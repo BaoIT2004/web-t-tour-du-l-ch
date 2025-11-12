@@ -208,3 +208,321 @@ input[type="password"]:focus {
 .login-bottom-text a:hover {
   text-decoration: underline;
 }
+
+
+/* ===================== */
+/* TRANG CHỦ (namespaced)*/
+/* ===================== */
+
+.home-page{
+  text-align: initial;
+  padding: 0;
+  background: linear-gradient(120deg, #0f1115, #1b2230);
+  color: #e7ebf3;
+  min-height: 100vh;
+  max-width: none;
+}
+
+.home-page{
+  --hp-text: #e7ebf3;
+  --hp-muted: #a8b0c2;
+  --hp-card: #ffffff;
+  --hp-line: #e6e8ee;
+  --hp-shadow: 0 10px 28px rgba(15,17,21,.22);
+  --hp-primary: #1666f0;
+}
+
+.home-page .hp-container{max-width:1100px; margin:0 auto; padding:0 16px}
+
+/* Thanh topbar cố định */
+.hp-topbar {
+  position: fixed;           /* cố định ở đầu trang */
+  top: 0;                    /* dính sát mép trên */
+  left: 0;
+  width: 100%;               /* kéo hết chiều ngang */
+  z-index: 1000;             /* nằm trên cùng */
+  background: #0f1115;       /* hoặc màu gradient bạn muốn */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.home-page .hp-brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+.home-page .hp-logo{background:#1a73e8; border-radius:50%; width:32px; height:32px; display:grid; place-items:center}
+.home-page .hp-brand-sub{font-weight:400; font-size:12px; color:var(--hp-muted); margin-left:8px}
+.home-page .hp-nav{display:flex; gap:18px}
+.home-page .hp-nav a{color:var(--hp-text); text-decoration:none; opacity:.9}
+.home-page .hp-nav a:hover{opacity:1}
+.home-page .hp-pill{background:#212836; color:var(--hp-text); border:none; padding:8px 12px; border-radius:999px; margin-left:20px; cursor:pointer; margin-right: 80px;}
+
+.home-page .hp-hero{padding:48px 0 32px;margin-top: 40px;}
+.home-page .hp-hero h1{font-size:42px; margin:0 0 8px}
+.home-page .hp-hero p{color:var(--hp-muted); margin:0 0 18px}
+
+.home-page .hp-tabs{
+  display:flex; gap:10px; background:rgba(255,255,255,.05);
+  padding:10px; border-radius:999px; width:max-content;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)
+}
+.home-page .hp-tab{
+  display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:999px;
+  background:transparent; color:var(--hp-text); border:none; cursor:pointer
+}
+.home-page .hp-tab.hp-active{background:#222a39; box-shadow:var(--hp-shadow)}
+
+.home-page .hp-search{
+  background:var(--hp-card); color:#10131a; border-radius:22px; margin-top:18px;
+  box-shadow:var(--hp-shadow); padding:16px
+}
+.home-page .hp-search-top{display:flex; gap:12px; padding:4px 4px 12px}
+.home-page .hp-chip{
+  display:flex; align-items:center; gap:8px; background:#f2f5fb;
+  border-radius:999px; padding:6px 10px; font-weight:600
+}
+.home-page .hp-chip select{border:none; background:transparent; outline:none; font-weight:600}
+
+.home-page .hp-grid{
+  display:grid; grid-template-columns:1.1fr 48px 1.1fr 1fr 1fr 60px; gap:12px;
+}
+@media (max-width: 980px){
+  .home-page .hp-grid{grid-template-columns: 1fr 1fr}
+  .home-page .hp-swap{order:3}
+}
+
+.home-page .hp-field{
+  display:flex; align-items:center; gap:8px; background:#f6f8fd;
+  border:1px solid var(--hp-line); padding:10px 12px; border-radius:12px
+}
+.home-page .hp-field input{
+  border:none; outline:none; background:transparent; width:100%;
+  font-size:14px; color:#10131a
+}
+.home-page .hp-swap{
+  border:none; border-radius:12px; background:#e9eefc; cursor:pointer; font-size:18px
+}
+.home-page .hp-search-btn{
+  border:none; border-radius:12px; background:var(--hp-primary); color:#fff;
+  font-size:18px; display:grid; place-items:center; cursor:pointer
+}
+.home-page .hp-search-btn:hover{filter:brightness(.95)}
+
+.home-page .hp-featured{
+  background:#fff; color:#10131a; margin-top:36px;
+  border-top-left-radius:22px; border-top-right-radius:22px; padding:36px 0
+}
+.home-page .hp-featured p{margin:0 0 18px; color:#607089}
+.home-page .hp-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+@media (max-width: 900px){ .home-page .hp-cards{grid-template-columns:repeat(2,1fr)} }
+@media (max-width: 580px){ .home-page .hp-cards{grid-template-columns:1fr} }
+
+.home-page .hp-card{
+  border:1px solid #eef0f6; border-radius:16px; padding:16px; background:#fff;
+  box-shadow:0 4px 14px rgba(16,19,26,.06)
+}
+.home-page .hp-card-head{display:flex; align-items:center; justify-content:space-between}
+.home-page .hp-card-head h3{margin:0; font-size:18px}
+.home-page .hp-card-sub{color:#7a869a; margin-top:6px}
+.home-page .hp-card-price{margin-top:10px; font-weight:700}
+
+
+/* Căn hành khách ngang hàng với icon giống mẫu */
+.hp-inline-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hp-inline-field span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #1f2937; /* xám đậm nhẹ */
+}
+
+.hp-passenger-input {
+  width: 60px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 15px;
+  outline: none;
+  color: #111;
+}
+/* Căn chữ “Hành khách” ngang hàng với ô nhập */
+.hp-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hp-inline span {
+  font-weight: 600;
+}
+/* Dropdown Customer */
+.hp-dd{ position:relative; display:inline-block;margin-right: 60px; }
+.hp-dd-menu{
+  position:absolute; right:0; top:calc(100% + 8px);
+  min-width:180px; background:#fff; color:#111;
+  border-radius:14px; box-shadow:0 10px 28px rgba(15,17,21,.22);
+  padding:8px 0; z-index:1200; display:none;
+}
+.hp-dd.open .hp-dd-menu{ display:block; }
+.hp-dd-item{ display:block; padding:10px 16px; text-decoration:none; color:#111; font-weight:500; }
+.hp-dd-item:hover{ background:#f4f6fb; }
+.hp-dd.open > .hp-pill{ outline:2px solid #1a73e8; }
+
+
+
+
+
+/* ===== Featured Hotels ===== */
+.hp-hotels{ background:#fff; color:#10131a; padding:32px 0 44px }
+.hp-hotels h2{ margin:0 0 6px }
+.hp-hotels p{ margin:0; color:#607089 }
+
+.hp-hotels-head{
+  display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:18px;
+}
+
+.hp-hotels-nav button{
+  width:40px; height:40px; border-radius:10px; border:1px solid #e8ebf2;
+  background:#fff; cursor:pointer; font-size:22px; line-height:1;
+  box-shadow:0 4px 14px rgba(16,19,26,.06);
+}
+.hp-hotels-nav button:hover{ background:#f6f8fd }
+
+.hp-hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* hiển thị 4 ô đều nhau */
+  gap: 24px;
+}
+
+@media (max-width: 1000px){ .hp-hotels-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 640px){ .hp-hotels-grid{ grid-template-columns: 1fr; } }
+
+/* Card */
+.hp-hotel-card{
+  border:1px solid #eef0f6; border-radius:16px; overflow:hidden; background:#fff;
+  box-shadow:0 4px 14px rgba(16,19,26,.06);
+}
+.hp-hotel-img{ aspect-ratio: 16/9; background:#e9eef6; }
+.hp-hotel-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.hp-hotel-img-ph{ width:100%; height:100%; display:grid; place-items:center; color:#7b8794; font-weight:600; }
+
+.hp-hotel-meta{ padding:12px 12px 16px; }
+.hp-hotel-price{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;
+}
+.hp-hotel-price .currency{ font-weight:700; letter-spacing:.4px }
+.hp-hotel-price strong{ font-size:20px }
+.hp-hotel-price .per{ color:#6b7280 }
+.hp-hotel-price .bolt{ margin-left:2px; color:#ffb100 }
+.hp-hotel-price .rating{ margin-left:auto; color:#ff9900; font-weight:600; }
+
+.hp-hotel-title{ margin:4px 0 6px; font-size:18px }
+.hp-hotel-loc{ color:#7a869a }
+.hp-hotel-loc .city{ color:#4b5563; font-weight:600; margin-right:6px }
+
+/* Promo tile (cột 4) */
+.hp-hotel-promo{
+  border-radius:16px; overflow:hidden; background:linear-gradient(180deg,#f1f5ff, #dbe7ff);
+  box-shadow:0 8px 28px rgba(15,17,21,.1); display:flex; flex-direction:column;
+}
+.hp-hotel-promo-img{ flex:1 0 auto; min-height:180px; background:#d7e2ff; }
+.hp-hotel-promo-body{
+  padding:18px; text-align:center; color:#0b1a33;
+}
+.hp-hotel-promo-body h4{ margin:0; font-size:18px; line-height:1.4 }
+
+
+
+/* ========== Popular Tours ========== */
+.hp-tours-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding-bottom: 80px ;
+  
+}
+
+.hp-tour-card {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 106, 255, 0.1);
+}
+
+.hp-tour-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(51, 97, 233, 0.7), rgba(23, 141, 204, 0.2));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.hp-tour-city {
+  font-weight: 500;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.hp-tour-info {
+  margin-top: auto;
+}
+
+.hp-tour-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.hp-tour-price {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.hp-tour-info hr {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 6px 0 10px;
+}
+
+.hp-tour-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hp-tour-rating {
+  color: #ffb800;
+  font-size: 16px;
+}
+
+.hp-tour-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.hp-tour-btn:hover {
+  background: #2563eb;
+  color: white;
+}

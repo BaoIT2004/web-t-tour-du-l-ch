@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Signup from "./signup.jsx";
+import TrangChu from "./trangchu.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Signup />
+    <TrangChu />
   </React.StrictMode>
 );
