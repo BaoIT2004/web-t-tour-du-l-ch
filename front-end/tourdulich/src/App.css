@@ -1,9 +1,9 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+
+html, body {
+  margin: 0;
+  padding: 0;
 }
+
 /* Toàn trang */
 .login-page {
   min-height: 100vh;
@@ -258,12 +258,12 @@ input[type="password"]:focus {
 .home-page .hp-nav a:hover{opacity:1}
 .home-page .hp-pill{background:#212836; color:var(--hp-text); border:none; padding:8px 12px; border-radius:999px; margin-left:20px; cursor:pointer; margin-right: 80px;}
 
-.home-page .hp-hero{padding:48px 0 32px;margin-top: 40px;}
+.home-page .hp-hero{padding:48px 0 32px;margin-top: 65px;}
 .home-page .hp-hero h1{font-size:42px; margin:0 0 8px}
 .home-page .hp-hero p{color:var(--hp-muted); margin:0 0 18px}
 
 .home-page .hp-tabs{
-  display:flex; gap:10px; background:rgba(255,255,255,.05);
+  display:flex; gap:10px; background:rgba(21, 25, 108, 0.05);
   padding:10px; border-radius:999px; width:max-content;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)
 }
@@ -271,16 +271,21 @@ input[type="password"]:focus {
   display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:999px;
   background:transparent; color:var(--hp-text); border:none; cursor:pointer
 }
-.home-page .hp-tab.hp-active{background:#222a39; box-shadow:var(--hp-shadow)}
+.home-page .hp-tab.hp-active{background:#2b4a85; box-shadow:var(--hp-shadow)}
 
-.home-page .hp-search{
-  background:var(--hp-card); color:#10131a; border-radius:22px; margin-top:18px;
-  box-shadow:var(--hp-shadow); padding:16px
+.home-page .hp-search {
+  background: #f3f4f6;  /* 🌟 màu xám nhạt đẹp */
+  color: #10131a;
+  border-radius: 22px;
+  margin-top: 18px;
+  box-shadow: var(--hp-shadow);
+  padding: 16px;
 }
+
 .home-page .hp-search-top{display:flex; gap:12px; padding:4px 4px 12px}
 .home-page .hp-chip{
   display:flex; align-items:center; gap:8px; background:#f2f5fb;
-  border-radius:999px; padding:6px 10px; font-weight:600
+  border-radius:999px; padding:6px 10px; font-weight:600;border: 1px solid #bebebe; 
 }
 .home-page .hp-chip select{border:none; background:transparent; outline:none; font-weight:600}
 
@@ -301,7 +306,7 @@ input[type="password"]:focus {
   font-size:14px; color:#10131a
 }
 .home-page .hp-swap{
-  border:none; border-radius:12px; background:#e9eefc; cursor:pointer; font-size:18px
+  border:none; border-radius:12px; background:#f6f8fd; cursor:pointer; font-size:18px;height:50px;margin-top: 20px;border:1px solid var(--hp-line)
 }
 .home-page .hp-search-btn{
   border:none; border-radius:12px; background:var(--hp-primary); color:#fff;
@@ -442,12 +447,17 @@ input[type="password"]:focus {
 
 
 /* ========== Popular Tours ========== */
+.hp-tours {
+  background: #ffffff;     /* 🌟 nền trắng cho cả section */
+  color: #10131a;          /* màu chữ đậm để dễ đọc trên nền trắng */
+  padding: 32px 0 60px;    /* padding trên/dưới giống các section khác */
+}
+
 .hp-tours-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  padding-bottom: 80px ;
-  
+  padding-bottom: 60px;
 }
 
 .hp-tour-card {
@@ -526,3 +536,263 @@ input[type="password"]:focus {
   background: #2563eb;
   color: white;
 }
+
+/* recomended car */
+/* ===== Recommended Transfer Cars ===== */
+
+.hp-cars {
+  background: #fff;
+  color: #10131a;
+  padding: 32px 0 120px;   /* tăng bottom lên 80px, tạo khoảng trắng trước footer */
+}
+
+
+.hp-cars h2 {
+  margin: 0 0 20px;
+}
+
+.hp-cars-grid {
+  display: grid;
+  grid-template-columns: 1.2fr repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Promo tile bên trái */
+.hp-cars-promo {
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f0f7ff, #2d6bff);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(15, 17, 21, 0.16);
+  display: flex;
+  flex-direction: column;
+}
+
+.hp-cars-promo-img {
+  width: 100%;
+  height: 220px;
+  background-size: cover;
+  /* background-position: top;  <-- BỎ DÒNG NÀY */
+  background-position: center bottom;  /* hoặc: center 80% */
+  background-repeat: no-repeat;
+  border-radius: 16px 16px 0 0;
+}
+
+
+
+
+.hp-cars-promo-body {
+  padding: 18px 20px 20px;
+  text-align: left;
+}
+
+.hp-cars-promo-body h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.hp-cars-promo-body p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.hp-cars-promo-btn {
+  border: 1px solid #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hp-cars-promo-btn:hover {
+  background: #fff;
+  color: #2563eb;
+}
+
+/* Card xe */
+.hp-car-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e6e8ee;
+  padding: 14px 14px 16px;
+  box-shadow: 0 4px 14px rgba(16, 19, 26, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.hp-car-img {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f5f6fb;
+  padding: 10px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hp-car-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.hp-car-img-ph {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.hp-car-title {
+  margin: 10px 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.hp-car-rating {
+  color: #f59e0b;
+  margin-bottom: 6px;
+}
+
+.hp-car-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.hp-car-location {
+  color: #4b5563;
+}
+
+.hp-car-price .currency {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.hp-car-price strong {
+  font-size: 16px;
+}
+
+.hp-car-btn {
+  margin-top: auto;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  padding: 8px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hp-car-btn:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hp-cars-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hp-cars-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===================== */
+/* FOOTER */
+/* ===================== */
+/* ===== Footer ===== */
+.hp-footer {
+  width: 100%;
+  background: #0b0f19;
+  color: #e7ebf3;
+  margin-top: 0;              /* ❌ bỏ khoảng đen bên ngoài */
+  padding: 80px 0 25px;       /* ✅ vẫn giữ 80px khoảng trống bên trong footer */
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
+
+.hp-footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.hp-footer-col h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.hp-footer-col h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.hp-footer-col p {
+  margin: 0;
+  color: #a8b0c2;
+  line-height: 1.6;
+}
+
+.hp-footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hp-footer-col ul li {
+  margin: 6px 0;
+}
+
+.hp-footer-col ul li a {
+  color: #a8b0c2;
+  text-decoration: none;
+}
+
+.hp-footer-col ul li a:hover {
+  color: #fff;
+}
+
+.hp-footer-social a {
+  margin-right: 8px;
+  font-size: 18px;
+  color: #ffffff;
+  opacity: 0.85;
+}
+
+.hp-footer-social a:hover {
+  opacity: 1;
+}
+
+.hp-footer-bottom {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 13px;
+  color: #8c94a8;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hp-footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hp-footer-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+
+

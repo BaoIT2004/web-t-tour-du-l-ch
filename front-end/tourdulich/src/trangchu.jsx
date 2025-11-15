@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./app.css"; // dùng chung css tổng
 
-const TABS = ["Flights", "Hotels", "Tours", "Cars", "Visa"];
+const TABS = ["Flights", "Hotels", "Tours", "Cars"];
 
 const featuredFlights = [
   { city: "Lahore", airline: "Pakistan International", price: 100 },
@@ -53,6 +53,30 @@ const TOURS = [
       img: "",
     },
   ];
+  const TRANSFER_CARS = [
+    {
+      title: "Hyundai i10 or similar",
+      price: 150,
+      rating: 5,
+      location: "DXB",
+      img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png", // ←link ảnh xe
+    },
+    {
+      title: "Ford Focus 2023",
+      price: 100,
+      rating: 5,
+      location: "DXB",
+      img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png", // ← link ảnh xe
+    },
+    {
+      title: "Toyota Camry 2023 full options",
+      price: 120,
+      rating: 3,
+      location: "DXB",
+      img: "https://phptravels.net/uploads/uwps0eeblus4ws4ooo.jpg", // ← link ảnh xe
+    },
+  ];
+  
   
 
 /* ---------------- Dropdown Customer ---------------- */
@@ -124,7 +148,7 @@ function FeaturedHotels() {
                     <span className="currency">USD</span>{" "}
                     <strong>{h.price.toFixed(2)}</strong>{" "}
                     <span className="per">/ Night</span>
-                    <span className="bolt">⚡</span>
+                    <span className="bolt"></span>
                     <span className="rating">⭐ {h.rating}</span>
                   </div>
                   <h3 className="hp-hotel-title">{h.title}</h3>
@@ -193,9 +217,111 @@ function FeaturedHotels() {
       </section>
     );
   }
+  //----------------recommendedcar----------------------------------------//
+  function RecommendedCars() {
+    return (
+      <section className="hp-cars">
+        <div className="hp-container">
+          <h2>Recommended Transfer Cars</h2>
   
-  
+          <div className="hp-cars-grid">
+            {/* Promo tile bên trái */}
+            <article className="hp-cars-promo">
+  <div
+    className="hp-cars-promo-img"
+    style={{
+      backgroundImage:
+        "url('https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-o-to-11.jpg')",
+    }}
+  ></div>
 
+  <div className="hp-cars-promo-body">
+    <h3>Discover great cars for transfers</h3>
+    <p>Comfortable rides from airport to your hotel and more.</p>
+    <button className="hp-cars-promo-btn">View More</button>
+  </div>
+</article>
+  
+            {/* Các xe gợi ý */}
+            {TRANSFER_CARS.map((car, i) => (
+              <article key={i} className="hp-car-card">
+                <div className="hp-car-img">
+                  {car.img ? (
+                    <img src={car.img} alt={car.title} />
+                  ) : (
+                    <div className="hp-car-img-ph">Car image</div>
+                  )}
+                </div>
+  
+                <h3 className="hp-car-title">{car.title}</h3>
+  
+                <div className="hp-car-rating">
+                  {"★".repeat(car.rating)}
+                </div>
+  
+                <div className="hp-car-meta">
+                  <span className="hp-car-location"> {car.location}</span>
+                  <span className="hp-car-price">
+                    <span className="currency">USD</span>{" "}
+                    <strong>{car.price.toFixed(2)}</strong>
+                  </span>
+                </div>
+  
+                <button className="hp-car-btn">Book Now</button>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+  function Footer() {
+    return (
+      <footer className="hp-footer">
+        <div className="hp-container hp-footer-inner">
+          <div className="hp-footer-col">
+            <h3>BTQQ Travel</h3>
+            <p>Your trusted partner for flights, hotels, tours and cars.</p>
+          </div>
+  
+          <div className="hp-footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">Flights</a></li>
+              <li><a href="#">Hotels</a></li>
+              <li><a href="#">Tours</a></li>
+              <li><a href="#">Cars</a></li>
+            </ul>
+          </div>
+  
+          <div className="hp-footer-col">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="#">Help Center</a></li>
+              <li><a href="#">Contact Us</a></li>
+              <li><a href="#">Booking Guide</a></li>
+            </ul>
+          </div>
+  
+          <div className="hp-footer-col">
+            <h4>Follow Us</h4>
+            <div className="hp-footer-social">
+              <a href="#">🌐</a>
+              <a href="#">📘</a>
+              <a href="#">📸</a>
+              <a href="#">🎵</a>
+            </div>
+          </div>
+        </div>
+  
+        <div className="hp-footer-bottom">
+          © {new Date().getFullYear()} BTQQ Travel — All rights reserved.
+        </div>
+      </footer>
+    );
+  }
+  
+  
 /* ---------------- Trang chủ ---------------- */
 export default function TrangChu() {
   const [activeTab, setActiveTab] = useState("Flights");
@@ -228,7 +354,6 @@ export default function TrangChu() {
           <a href="#">Hotels</a>
           <a href="#">Tours</a>
           <a href="#">Cars</a>
-          <a href="#">Visa</a>
           <a href="#">Blogs</a>
         </nav>
 
@@ -332,9 +457,12 @@ export default function TrangChu() {
         </div>
       </section>
 
-      {/* Featured Hotels – đặt NGAY BÊN DƯỚI */}
+      {/*đặt NGAY BÊN DƯỚI */}
       <FeaturedHotels />
       <PopularTours />
+      <RecommendedCars /> 
+      <Footer />
+
     </div>
   );
 }
@@ -345,7 +473,6 @@ function iconFor(tab) {
     case "Hotels":  return "🏨";
     case "Tours":   return "🗺️";
     case "Cars":    return "🚗";
-    case "Visa":    return "🛂";
     default:        return null;
   }
 }
