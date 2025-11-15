@@ -306,7 +306,7 @@ input[type="password"]:focus {
   font-size:14px; color:#10131a
 }
 .home-page .hp-swap{
-  border:none; border-radius:12px; background:#f6f8fd; cursor:pointer; font-size:18px;height:50px;margin-top: 20px;border:1px solid var(--hp-line)
+  border:none; border-radius:12px; background:#f6f8fd; cursor:pointer; font-size:18px;height:50px;margin-top: 20px;border:1px solid var(--hp-line)  
 }
 .home-page .hp-search-btn{
   border:none; border-radius:12px; background:var(--hp-primary); color:#fff;
