@@ -1,8 +1,8 @@
 import express from 'express';
-import configureViewEngine from './configs/viewEngine.js';
+import configureViewEngine from './config/viewEngine.js';
 import initWebRoutes from './routs/web.js';
 import bodyParser from 'body-parser';
-import connectDB from './configs/connectDB.js'
+import connectDB from './config/connectDB.js'
 require('dotenv').config(); // su dung file .env (lấy các biến môi trường từ file .env)
 
 
