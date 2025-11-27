@@ -1,5 +1,6 @@
 import React from "react";
 import "./app.css"; 
+import { Link } from "react-router-dom";
 
 /* ================== CONSTANTS ================== */
 const featuredFlights = [
@@ -18,71 +19,85 @@ const featuredFlights = [
   ];
 
 //--------------------------header---------------------------------//
+/* -------- Header -------- */
 function Header() {
-    return (
-      <header className="hp-topbar">
-        <div className="hp-brand">
+  return (
+    <header className="hp-topbar">
+      <div className="hp-brand">
+        {/* Click logo / BTQQ Travel → luôn về trang chủ và reload */}
+        <a
+          href="/home"
+          style={{
+            textDecoration: "none",
+            color: "inherit",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
           <span className="hp-logo"></span>
           <span>BTQQ Travel</span>
-          <span className="hp-brand-sub"></span>
-        </div>
-  
-        <nav className="hp-nav">
-          <a href="#">Flights</a>
-          <a href="#">Hotels</a>
-          <a href="#">Tours</a>
-          <a href="#">Cars</a>
-          <a href="#">Blogs</a>
-        </nav>
-  
-        <div>
-          <CustomerMenu />
-        </div>
-      </header>
-    );
-  }
-  
-  /* -------- Dropdown Customer -------- */
-  function CustomerMenu() {
-    const [open, setOpen] = React.useState(false);
-    const ref = React.useRef(null);
-  
-    React.useEffect(() => {
-      const onDoc = (e) => {
-        if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-      };
-      const onEsc = (e) => {
-        if (e.key === "Escape") setOpen(false);
-      };
-      document.addEventListener("click", onDoc);
-      document.addEventListener("keydown", onEsc);
-      return () => {
-        document.removeEventListener("click", onDoc);
-        document.removeEventListener("keydown", onEsc);
-      };
-    }, []);
-  
-    return (
-      <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
-        <button
-          className="hp-pill"
-          onClick={() => setOpen((v) => !v)}
-          aria-haspopup="menu"
-          aria-expanded={open}
-        >
-          Customer ▾
-        </button>
-        <div className="hp-dd-menu" role="menu">
-          <a className="hp-dd-item" href="/login" role="menuitem">
-            Login
-          </a>
-          <a className="hp-dd-item" href="/signup" role="menuitem">
-            Signup
-          </a>
-        </div>
+        </a>
+        <span className="hp-brand-sub"></span>
       </div>
-    );
-  }
+
+      <nav className="hp-nav">
+        {/* Mỗi click ở đây đều chuyển trang + load lại từ đầu */}
+        <a href="/flights">Flights</a>
+        <a href="/hotels">Hotels</a>
+        <a href="/tours">Tours</a>
+        <a href="/cars">Cars</a>
+        <a href="/blogs">Blogs</a> {/* hoặc "#" nếu chưa có trang blogs */}
+      </nav>
+
+      <div>
+        <CustomerMenu />
+      </div>
+    </header>
+  );
+}
+
+/* -------- Dropdown Customer -------- */
+function CustomerMenu() {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onEsc = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("click", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("click", onDoc);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, []);
+
+  return (
+    <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
+      <button
+        className="hp-pill"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        Customer ▾
+      </button>
+      <div className="hp-dd-menu" role="menu">
+        <a className="hp-dd-item" href="/login" role="menuitem">
+          Login
+        </a>
+        <a className="hp-dd-item" href="/signup" role="menuitem">
+          Signup
+        </a>
+      </div>
+    </div>
+  );
+}
 
   /* -------- Hero + Tabs + Search -------- */
 function HeroSearch() {

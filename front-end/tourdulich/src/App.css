@@ -6,6 +6,8 @@ html, body {
 
 /* Toàn trang */
 .login-page {
+  padding-top: 40px;
+  padding-bottom:60px ;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -842,6 +844,7 @@ input[type="password"]:focus {
 
 .hp-cars h2 {
   margin: 0 0 20px;
+  padding-bottom: 20px;
 }
 
 .hp-cars-grid {
@@ -1168,3 +1171,68 @@ input[type="password"]:focus {
 }
 .hero-ks h1{font-size:42px; margin:0 0 8px}
 .hero-ks p{color:white; margin:0 0 18px}
+
+/* ===== HERO BACKGROUND ONLY CỦA Tours===== */
+
+.hero-tour {
+  position: relative;
+  background-image: url("https://cdn.tcdulichtphcm.vn/upload/1-2023/images/2023-02-01/1675231061-khi-khi-cau-hue.jpg"); /* ảnh bạn muốn */
+  background-size: cover; 
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  padding-top: 60px;
+  padding-bottom: 80px;
+}
+
+/* lớp tối mờ nhẹ */
+.hero-tour::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 0;
+}
+
+/* nội dung nằm trên overlay */
+.hero-tour > * {
+  position: relative;
+  z-index: 2;
+}
+.hero-tour h1{font-size:42px; margin:0 0 8px}
+.hero-tour p{color:white; margin:0 0 18px}
+
+/* ===== HERO BACKGROUND ONLY CỦA Tours===== */
+
+.hero-car {
+  position: relative;
+  background-image: url("https://glaco.com.vn/wp-content/uploads/2024/07/vat-dung-can-chuan-bi-khi-du-lich-bang-o-to.jpg");
+  background-size: contain;      
+  background-repeat: no-repeat;  
+  background-position: center;
+  overflow: hidden;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  padding-top: 60px;
+  padding-bottom: 180px;
+  background-size: 120%;
+}
+
+
+.hero-car::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 0;
+}
+
+/* nội dung nằm trên overlay */
+.hero-car > * {
+  position: relative;
+  z-index: 2;
+}
+.hero-car h1{font-size:42px; margin:0 0 8px}
+.hero-car p{color:white; margin:0 0 18px}

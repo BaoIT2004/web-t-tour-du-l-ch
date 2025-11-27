@@ -3,42 +3,41 @@ import "./app.css";
 import { Link } from "react-router-dom";
 
 /* ================== CONSTANTS ================== */
-const HOTELS = [
+const TOURS = [
     {
-      title: "Movenpick Grand Al Bustan",
+      title: "Desert Safari Adventure",
       city: "Dubai",
       country: "United Arab Emirates",
-      price: 200,
+      price: 120,
       rating: 5,
       img: "",
     },
     {
-      title: "Four Points by Sheraton Bur Dubai",
-      city: "Dubai",
-      country: "United Arab Emirates",
-      price: 260,
+      title: "Halong Bay Cruise",
+      city: "Ha Long",
+      country: "Vietnam",
+      price: 200,
       rating: 4,
       img: "",
     },
     {
-      title: "Armani Hotel Dubai",
-      city: "Dubai",
-      country: "United Arab Emirates",
-      price: 100,
-      rating: 3,
+      title: "Bangkok City Tour",
+      city: "Bangkok",
+      country: "Thailand",
+      price: 150,
+      rating: 4,
       img: "",
     },
     {
-      title: "Hilton Dubai Creek",
-      city: "Dubai",
-      country: "United Arab Emirates",
+      title: "Singapore Night Safari",
+      city: "Singapore",
+      country: "Singapore",
       price: 180,
-      rating: 4,
+      rating: 5,
       img: "",
     },
   ];
-
-  //--------------------------header---------------------------------//
+    //--------------------------header---------------------------------//
  /* -------- Header -------- */
  function Header() {
   return (
@@ -120,138 +119,103 @@ function CustomerMenu() {
 }
 
 
-  /* -------- Hero + Tabs + Search -------- */
-  function HeroSearch() {
-    const [hotelLocation, setHotelLocation] = React.useState("");
-    const [hotelCheckin, setHotelCheckin] = React.useState(() => {
+/* -------- Hero + Search (Tours) -------- */
+function HeroSearch() {
+    const [tourLocation, setTourLocation] = React.useState("");
+    const [tourDate, setTourDate] = React.useState(() => {
       const d = new Date();
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
       return `${d.getFullYear()}-${mm}-${dd}`;
     });
-    const [hotelCheckout, setHotelCheckout] = React.useState(() => {
-      const d = new Date();
-      d.setDate(d.getDate() + 1);
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${d.getFullYear()}-${mm}-${dd}`;
-    });
+    const [tourTravellers, setTourTravellers] = React.useState(1);
+    const [openTourGuests, setOpenTourGuests] = React.useState(false);
   
-    const [hotelRooms, setHotelRooms] = React.useState(1);
-    const [hotelTravellers, setHotelTravellers] = React.useState(2);
-    const [openGuests, setOpenGuests] = React.useState(false);
-    const hotelGuestsRef = React.useRef(null);
+    const tourGuestsRef = React.useRef(null);
   
-    const changeHotelGuest = (type, delta) => {
-      if (type === "rooms") {
-        setHotelRooms((v) => Math.max(1, v + delta));
-      } else if (type === "travellers") {
-        setHotelTravellers((v) => Math.max(1, v + delta));
-      }
-    };
+    // Đóng popup Travellers khi click ra ngoài
+    React.useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (
+          tourGuestsRef.current &&
+          !tourGuestsRef.current.contains(e.target)
+        ) {
+          setOpenTourGuests(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
   
     return (
-      <section className="hero-ks">
+      <section className="hero-tour">
         <div className="hp-container-cb">
-          <h1>Every flight is an opportunity to explore.</h1>
-          <p>Choose your flight today, reach your dreams tomorrow.</p>
+          <h1>Search for best Tours</h1>
+          <p>Find amazing experiences around the world.</p>
   
-          {/* ✅ KHUNG TRẮNG BÊN NGOÀI, GIỐNG CODE FLIGHT */}
+          {/* Khung trắng search giống bên Flights */}
           <div className="hp-search">
-            <div className="hp-grid-hotels">
-              {/* Location */}
-              <label className="hp-hotel-field hp-hotel-loc">
+            <div className="hp-grid-tours">
+              {/* City */}
+              <label className="hp-hotel-field hp-tour-city">
                 <input
                   className="hp-hotel-input"
-                  placeholder="Where are you going?"
-                  value={hotelLocation}
-                  onChange={(e) => setHotelLocation(e.target.value)}
+                  placeholder="Search your city"
+                  value={tourLocation}
+                  onChange={(e) => setTourLocation(e.target.value)}
                 />
               </label>
   
-              {/* Checkin */}
+              {/* Date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkin</span>
+                  <span className="hp-hotel-label">Date</span>
                   <input
                     type="date"
                     className="hp-hotel-date-input"
-                    value={hotelCheckin}
-                    onChange={(e) => setHotelCheckin(e.target.value)}
+                    value={tourDate}
+                    onChange={(e) => setTourDate(e.target.value)}
                   />
                 </div>
               </label>
   
-              {/* Checkout */}
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkout</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={hotelCheckout}
-                    onChange={(e) => setHotelCheckout(e.target.value)}
-                  />
-                </div>
-              </label>
-  
-              {/* Travellers & Rooms */}
+              {/* Travellers */}
               <label
-                ref={hotelGuestsRef}
-                className="hp-hotel-field hp-hotel-people"
-                onClick={() => setOpenGuests((v) => !v)}
+                ref={tourGuestsRef}
+                className="hp-hotel-field hp-tour-people"
+                onClick={() => setOpenTourGuests((v) => !v)}
               >
-                <div className="hp-hotel-people-text">
-                  <span className="hp-hotel-label">Travellers</span>
-                  <strong>{hotelTravellers}</strong>
-                  <span className="hp-hotel-label rooms-label">Rooms</span>
-                  <strong>{hotelRooms}</strong>
+                <span className="hp-hotel-icon"></span>
+                <div className="hp-tour-people-text">
+                  <span className="hp-tour-label-strong">Travellers</span>
+                  <span>&nbsp;{tourTravellers}</span>
                 </div>
-  
                 <span className="hp-hotel-chevron">▾</span>
   
-                {openGuests && (
+                {openTourGuests && (
                   <div
                     className="hp-guests-popover"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Rooms */}
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Rooms</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          type="button"
-                          onClick={() => changeHotelGuest("rooms", -1)}
-                        >
-                          −
-                        </button>
-                        <span>{hotelRooms}</span>
-                        <button
-                          type="button"
-                          onClick={() => changeHotelGuest("rooms", 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-  
-                    {/* Travellers */}
                     <div className="hp-guest-row">
                       <span className="hp-guest-label">Travellers</span>
                       <div className="hp-guest-counter">
                         <button
                           type="button"
                           onClick={() =>
-                            changeHotelGuest("travellers", -1)
+                            setTourTravellers((v) => Math.max(1, v - 1))
                           }
                         >
                           −
                         </button>
-                        <span>{hotelTravellers}</span>
+                        <span>{tourTravellers}</span>
                         <button
                           type="button"
                           onClick={() =>
-                            changeHotelGuest("travellers", 1)
+                            setTourTravellers((v) => v + 1)
                           }
                         >
                           +
@@ -272,30 +236,29 @@ function CustomerMenu() {
     );
   }
   
-  
-
-  //------------------------------featuredHotels--------------------------------------------------------------------//
-  function FeaturedHotels() {
+//------------------populartour--------------------//
+  function PopularTours() {
     const [start, setStart] = React.useState(0);
     const visible = 4;
   
-    const maxStart = Math.max(0, HOTELS.length - visible);
+    const maxStart = Math.max(0, TOURS.length - visible);
     const next = () => setStart((s) => (s >= maxStart ? 0 : s + visible));
     const prev = () => setStart((s) => (s <= 0 ? maxStart : s - visible));
   
-    const slice = HOTELS.slice(start, start + visible);
+    const slice = TOURS.slice(start, start + visible);
     if (slice.length < visible) {
-      slice.push(...HOTELS.slice(0, visible - slice.length));
+      slice.push(...TOURS.slice(0, visible - slice.length));
     }
   
     return (
-      <section className="hp-hotels" style={{marginTop:"80px",paddingBottom:"90px"}}>
+      <section className="hp-tours">
         <div className="hp-container">
           <div className="hp-hotels-head">
             <div>
-              <h2>Featured Hotels</h2>
+              <h2>Popular Tours</h2>
               <p>These alluring destinations are picked just for you.</p>
             </div>
+  
             <div className="hp-hotels-nav">
               <button onClick={prev} aria-label="Previous">
                 ‹
@@ -306,28 +269,26 @@ function CustomerMenu() {
             </div>
           </div>
   
-          <div className="hp-hotels-grid">
-            {slice.map((h, i) => (
-              <article key={i} className="hp-hotel-card">
-                <div className="hp-hotel-img">
-                  {h.img ? (
-                    <img src={h.img} alt={h.title} />
-                  ) : (
-                    <div className="hp-hotel-img-ph">Image</div>
-                  )}
-                </div>
-                <div className="hp-hotel-meta">
-                  <div className="hp-hotel-price">
-                    <span className="currency">USD</span>{" "}
-                    <strong>{h.price.toFixed(2)}</strong>{" "}
-                    <span className="per">/ Night</span>
-                    <span className="bolt"></span>
-                    <span className="rating">⭐ {h.rating}</span>
-                  </div>
-                  <h3 className="hp-hotel-title">{h.title}</h3>
-                  <div className="hp-hotel-loc">
-                    <span className="city">{h.city}</span>{" "}
-                    <span className="country">{h.country}</span>
+          <div className="hp-tours-grid">
+            {slice.map((t, i) => (
+              <article
+                key={i}
+                className="hp-tour-card"
+                style={{ backgroundImage: `url(${t.img || ""})` }}
+              >
+                <div className="hp-tour-overlay">
+                  <div className="hp-tour-city">{t.city}</div>
+  
+                  <div className="hp-tour-info">
+                    <h3 className="hp-tour-title">{t.title}</h3>
+                    <p className="hp-tour-price">USD {t.price.toFixed(2)}</p>
+                    <hr />
+                    <div className="hp-tour-bottom">
+                      <div className="hp-tour-rating">
+                        {"⭐".repeat(t.rating)}
+                      </div>
+                      <button className="hp-tour-btn">Chi tiết →</button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -337,7 +298,8 @@ function CustomerMenu() {
       </section>
     );
   }
-   /* -------- Footer -------- */
+  
+/* -------- Footer -------- */
 function Footer() {
     return (
       <footer className="hp-footer">
@@ -397,14 +359,14 @@ function Footer() {
       </footer>
     );
   }
-  
 
-  export default function Khachsan() {
+
+  export default function Tour() {
     return (
       <div className="home-page">
         <Header />
-        <HeroSearch />
-        <FeaturedHotels />
+        <HeroSearch/>
+        <PopularTours />
         <Footer />
       </div>
     );

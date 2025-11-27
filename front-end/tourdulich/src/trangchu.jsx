@@ -1,6 +1,8 @@
 import React from "react";
 import "./app.css"; // dùng chung css tổng
 
+
+
 /* ================== CONSTANTS ================== */
 
 const TABS = ["Flights", "Hotels", "Tours", "Cars"];
@@ -108,21 +110,35 @@ const TRANSFER_CARS = [
 /* ================== COMPONENTS ================== */
 
 /* -------- Header -------- */
+
 function Header() {
   return (
     <header className="hp-topbar">
       <div className="hp-brand">
-        <span className="hp-logo"></span>
-        <span>BTQQ Travel</span>
+        {/* Click logo / BTQQ Travel → luôn về trang chủ và reload */}
+        <a
+          href="/home"
+          style={{
+            textDecoration: "none",
+            color: "inherit",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <span className="hp-logo"></span>
+          <span>BTQQ Travel</span>
+        </a>
         <span className="hp-brand-sub"></span>
       </div>
 
       <nav className="hp-nav">
-        <a href="#">Flights</a>
-        <a href="#">Hotels</a>
-        <a href="#">Tours</a>
-        <a href="#">Cars</a>
-        <a href="#">Blogs</a>
+        {/* Mỗi click ở đây đều chuyển trang + load lại từ đầu */}
+        <a href="/flights">Flights</a>
+        <a href="/hotels">Hotels</a>
+        <a href="/tours">Tours</a>
+        <a href="/cars">Cars</a>
+        <a href="/blogs">Blogs</a> {/* hoặc "#" nếu chưa có trang blogs */}
       </nav>
 
       <div>
@@ -174,7 +190,6 @@ function CustomerMenu() {
   );
 }
 
-/* -------- Hero + Tabs + Search -------- */
 /* -------- Hero + Tabs + Search -------- */
 function HeroSearch() {
   const [activeTab, setActiveTab] = React.useState("Flights");
@@ -310,7 +325,6 @@ function HeroSearch() {
           ))}
         </div>
 
-        {/* CARD TRẮNG: nội dung theo từng tab */}
         <div className="hp-search">
           {/* =============== FLIGHTS =============== */}
           {activeTab === "Flights" && (
@@ -661,9 +675,7 @@ function FeaturedFlights() {
   return (
     <section className="hp-featured">
       <div className="hp-container">
-        <h2>Featured Flights</h2>
-        <p>These alluring destinations are picked just for you.</p>
-
+        <h2>Chuyến bay nổi bật</h2>
         <div className="hp-cards">
           {featuredFlights.map((f, i) => (
             <div className="hp-card" key={i}>
@@ -702,8 +714,7 @@ function FeaturedHotels() {
       <div className="hp-container">
         <div className="hp-hotels-head">
           <div>
-            <h2>Featured Hotels</h2>
-            <p>These alluring destinations are picked just for you.</p>
+            <h2>Khách sạn nổi bật</h2>
           </div>
           <div className="hp-hotels-nav">
             <button onClick={prev} aria-label="Previous">
@@ -766,8 +777,7 @@ function PopularTours() {
       <div className="hp-container">
         <div className="hp-hotels-head">
           <div>
-            <h2>Popular Tours</h2>
-            <p>These alluring destinations are picked just for you.</p>
+            <h2>Tour phổ biến</h2>
           </div>
 
           <div className="hp-hotels-nav">
@@ -815,7 +825,7 @@ function RecommendedCars() {
   return (
     <section className="hp-cars">
       <div className="hp-container">
-        <h2>Recommended Transfer Cars</h2>
+        <h2>Xe trung chuyển được đề xuất</h2>
 
         <div className="hp-cars-grid">
           {/* Promo tile bên trái */}

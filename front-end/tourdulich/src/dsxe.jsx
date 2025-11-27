@@ -2,43 +2,27 @@ import React from "react";
 import "./app.css"; 
 import { Link } from "react-router-dom";
 
-/* ================== CONSTANTS ================== */
-const HOTELS = [
+const TRANSFER_CARS = [
     {
-      title: "Movenpick Grand Al Bustan",
-      city: "Dubai",
-      country: "United Arab Emirates",
-      price: 200,
+      title: "Hyundai i10 or similar",
+      price: 150,
       rating: 5,
-      img: "",
+      img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png",
     },
     {
-      title: "Four Points by Sheraton Bur Dubai",
-      city: "Dubai",
-      country: "United Arab Emirates",
-      price: 260,
-      rating: 4,
-      img: "",
-    },
-    {
-      title: "Armani Hotel Dubai",
-      city: "Dubai",
-      country: "United Arab Emirates",
+      title: "Ford Focus 2023",
       price: 100,
-      rating: 3,
-      img: "",
+      rating: 5,
+      img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png",
     },
     {
-      title: "Hilton Dubai Creek",
-      city: "Dubai",
-      country: "United Arab Emirates",
-      price: 180,
-      rating: 4,
-      img: "",
+      title: "Toyota Camry 2023 full options",
+      price: 120,
+      rating: 3,
+      img: "https://phptravels.net/uploads/uwps0eeblus4ws4ooo.jpg",
     },
   ];
-
-  //--------------------------header---------------------------------//
+  /* ================== COMPONENTS ================== */
  /* -------- Header -------- */
  function Header() {
   return (
@@ -118,140 +102,125 @@ function CustomerMenu() {
     </div>
   );
 }
-
-
-  /* -------- Hero + Tabs + Search -------- */
-  function HeroSearch() {
-    const [hotelLocation, setHotelLocation] = React.useState("");
-    const [hotelCheckin, setHotelCheckin] = React.useState(() => {
+/* -------- Hero + Search (Cars) -------- */
+function HeroSearch() {
+    const [carLocation, setCarLocation] = React.useState("");
+    const [carPickup, setCarPickup] = React.useState(() => {
       const d = new Date();
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
       return `${d.getFullYear()}-${mm}-${dd}`;
     });
-    const [hotelCheckout, setHotelCheckout] = React.useState(() => {
+    const [carDropoff, setCarDropoff] = React.useState(() => {
       const d = new Date();
       d.setDate(d.getDate() + 1);
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
       return `${d.getFullYear()}-${mm}-${dd}`;
     });
+    const [carTravellers, setCarTravellers] = React.useState(1);
+    const [openCarGuests, setOpenCarGuests] = React.useState(false);
   
-    const [hotelRooms, setHotelRooms] = React.useState(1);
-    const [hotelTravellers, setHotelTravellers] = React.useState(2);
-    const [openGuests, setOpenGuests] = React.useState(false);
-    const hotelGuestsRef = React.useRef(null);
+    const carGuestsRef = React.useRef(null);
   
-    const changeHotelGuest = (type, delta) => {
-      if (type === "rooms") {
-        setHotelRooms((v) => Math.max(1, v + delta));
-      } else if (type === "travellers") {
-        setHotelTravellers((v) => Math.max(1, v + delta));
-      }
-    };
+    // Đóng popup travellers khi click ra ngoài
+    React.useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (
+          carGuestsRef.current &&
+          !carGuestsRef.current.contains(e.target)
+        ) {
+          setOpenCarGuests(false);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
   
     return (
-      <section className="hero-ks">
-        <div className="hp-container-cb">
-          <h1>Every flight is an opportunity to explore.</h1>
-          <p>Choose your flight today, reach your dreams tomorrow.</p>
+      <section className="hero-car">
+        <div className="hp-container">
+          <h1>Chose your best Car!</h1>
+          <p>
+          Always safe and always by your side on every journey.
+          </p>
   
-          {/* ✅ KHUNG TRẮNG BÊN NGOÀI, GIỐNG CODE FLIGHT */}
+          {/* ✅ KHUNG TRẮNG BÊN NGOÀI FORM SEARCH */}
           <div className="hp-search">
-            <div className="hp-grid-hotels">
-              {/* Location */}
-              <label className="hp-hotel-field hp-hotel-loc">
+            <div className="hp-grid-cars">
+              {/* City */}
+              <label className="hp-hotel-field">
                 <input
                   className="hp-hotel-input"
-                  placeholder="Where are you going?"
-                  value={hotelLocation}
-                  onChange={(e) => setHotelLocation(e.target.value)}
+                  placeholder="Search your city"
+                  value={carLocation}
+                  onChange={(e) => setCarLocation(e.target.value)}
                 />
               </label>
   
-              {/* Checkin */}
+              {/* Pick up date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkin</span>
+                  <span className="hp-hotel-label">Pick up date</span>
                   <input
                     type="date"
                     className="hp-hotel-date-input"
-                    value={hotelCheckin}
-                    onChange={(e) => setHotelCheckin(e.target.value)}
+                    value={carPickup}
+                    onChange={(e) => setCarPickup(e.target.value)}
                   />
                 </div>
               </label>
   
-              {/* Checkout */}
+              {/* Drop off date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkout</span>
+                  <span className="hp-hotel-label">Drop off date</span>
                   <input
                     type="date"
                     className="hp-hotel-date-input"
-                    value={hotelCheckout}
-                    onChange={(e) => setHotelCheckout(e.target.value)}
+                    value={carDropoff}
+                    onChange={(e) => setCarDropoff(e.target.value)}
                   />
                 </div>
               </label>
   
-              {/* Travellers & Rooms */}
+              {/* Travellers */}
               <label
-                ref={hotelGuestsRef}
-                className="hp-hotel-field hp-hotel-people"
-                onClick={() => setOpenGuests((v) => !v)}
+                ref={carGuestsRef}
+                className="hp-hotel-field hp-tour-people"
+                onClick={() => setOpenCarGuests((v) => !v)}
               >
-                <div className="hp-hotel-people-text">
-                  <span className="hp-hotel-label">Travellers</span>
-                  <strong>{hotelTravellers}</strong>
-                  <span className="hp-hotel-label rooms-label">Rooms</span>
-                  <strong>{hotelRooms}</strong>
+                <span className="hp-hotel-icon">👥</span>
+                <div className="hp-tour-people-text">
+                  <span className="hp-tour-label-strong">Travellers</span>
+                  <span>&nbsp;{carTravellers}</span>
                 </div>
-  
                 <span className="hp-hotel-chevron">▾</span>
   
-                {openGuests && (
+                {openCarGuests && (
                   <div
                     className="hp-guests-popover"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Rooms */}
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Rooms</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          type="button"
-                          onClick={() => changeHotelGuest("rooms", -1)}
-                        >
-                          −
-                        </button>
-                        <span>{hotelRooms}</span>
-                        <button
-                          type="button"
-                          onClick={() => changeHotelGuest("rooms", 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-  
-                    {/* Travellers */}
                     <div className="hp-guest-row">
                       <span className="hp-guest-label">Travellers</span>
                       <div className="hp-guest-counter">
                         <button
                           type="button"
                           onClick={() =>
-                            changeHotelGuest("travellers", -1)
+                            setCarTravellers((v) => Math.max(1, v - 1))
                           }
                         >
                           −
                         </button>
-                        <span>{hotelTravellers}</span>
+                        <span>{carTravellers}</span>
                         <button
                           type="button"
                           onClick={() =>
-                            changeHotelGuest("travellers", 1)
+                            setCarTravellers((v) => v + 1)
                           }
                         >
                           +
@@ -272,64 +241,52 @@ function CustomerMenu() {
     );
   }
   
-  
 
-  //------------------------------featuredHotels--------------------------------------------------------------------//
-  function FeaturedHotels() {
-    const [start, setStart] = React.useState(0);
-    const visible = 4;
-  
-    const maxStart = Math.max(0, HOTELS.length - visible);
-    const next = () => setStart((s) => (s >= maxStart ? 0 : s + visible));
-    const prev = () => setStart((s) => (s <= 0 ? maxStart : s - visible));
-  
-    const slice = HOTELS.slice(start, start + visible);
-    if (slice.length < visible) {
-      slice.push(...HOTELS.slice(0, visible - slice.length));
-    }
-  
+  /* -------- Recommended Cars -------- */
+function RecommendedCars() {
     return (
-      <section className="hp-hotels" style={{marginTop:"80px",paddingBottom:"90px"}}>
+      <section className="hp-cars">
         <div className="hp-container">
-          <div className="hp-hotels-head">
-            <div>
-              <h2>Featured Hotels</h2>
-              <p>These alluring destinations are picked just for you.</p>
-            </div>
-            <div className="hp-hotels-nav">
-              <button onClick={prev} aria-label="Previous">
-                ‹
-              </button>
-              <button onClick={next} aria-label="Next">
-                ›
-              </button>
-            </div>
-          </div>
+          <h2>Recommended Transfer Cars</h2>
   
-          <div className="hp-hotels-grid">
-            {slice.map((h, i) => (
-              <article key={i} className="hp-hotel-card">
-                <div className="hp-hotel-img">
-                  {h.img ? (
-                    <img src={h.img} alt={h.title} />
+          <div className="hp-cars-grid">
+            {/* Promo tile bên trái */}
+            <article className="hp-cars-promo">
+              <div
+                className="hp-cars-promo-img"
+                style={{
+                  backgroundImage:
+                    "url('https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-o-to-11.jpg')",
+                }}
+              ></div>
+  
+              <div className="hp-cars-promo-body">
+                <h3>Discover great cars for transfers</h3>
+                <p>Comfortable rides from airport to your hotel and more.</p>
+                <button className="hp-cars-promo-btn">View More</button>
+              </div>
+            </article>
+  
+            {/* Các xe gợi ý */}
+            {TRANSFER_CARS.map((car, i) => (
+              <article key={i} className="hp-car-card">
+                <div className="hp-car-img">
+                  {car.img ? (
+                    <img src={car.img} alt={car.title} />
                   ) : (
-                    <div className="hp-hotel-img-ph">Image</div>
+                    <div className="hp-car-img-ph">Car image</div>
                   )}
                 </div>
-                <div className="hp-hotel-meta">
-                  <div className="hp-hotel-price">
+                <h3 className="hp-car-title">{car.title}</h3>
+                <div className="hp-car-rating">{"★".repeat(car.rating)}</div>
+                <div className="hp-car-meta">
+                  <span className="hp-car-price">
                     <span className="currency">USD</span>{" "}
-                    <strong>{h.price.toFixed(2)}</strong>{" "}
-                    <span className="per">/ Night</span>
-                    <span className="bolt"></span>
-                    <span className="rating">⭐ {h.rating}</span>
-                  </div>
-                  <h3 className="hp-hotel-title">{h.title}</h3>
-                  <div className="hp-hotel-loc">
-                    <span className="city">{h.city}</span>{" "}
-                    <span className="country">{h.country}</span>
-                  </div>
+                    <strong>{car.price.toFixed(2)}</strong>
+                  </span>
                 </div>
+  
+                <button className="hp-car-btn">Book Now</button>
               </article>
             ))}
           </div>
@@ -337,8 +294,9 @@ function CustomerMenu() {
       </section>
     );
   }
-   /* -------- Footer -------- */
-function Footer() {
+  
+  /* -------- Footer -------- */
+  function Footer() {
     return (
       <footer className="hp-footer">
         <div className="hp-container hp-footer-inner">
@@ -398,13 +356,12 @@ function Footer() {
     );
   }
   
-
-  export default function Khachsan() {
+  export default function XE() {
     return (
       <div className="home-page">
         <Header />
-        <HeroSearch />
-        <FeaturedHotels />
+        <HeroSearch/>
+        <RecommendedCars />
         <Footer />
       </div>
     );
