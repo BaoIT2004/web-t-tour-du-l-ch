@@ -396,6 +396,200 @@
     color: #f97373;     /* đỏ nhạt */
   }
   
+  /*dashboard user*/
+  /* ====== Header row: title trái, toolbar phải ====== */
+.dash-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ====== Toolbar ====== */
+.dash-users-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-input,
+.dash-select {
+  height: 36px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.dash-input:focus,
+.dash-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.dash-btn {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.dash-btn:hover {
+  background: #eef2ff;
+}
+
+.dash-btn-primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
+
+.dash-btn-primary:hover {
+  filter: brightness(.95);
+}
+
+/* ====== Bảng Users ====== */
+.dash-table-wrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;              /* bo tròn khung như wireframe */
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 14px;
+}
+
+.dash-table thead th {
+  background: #f9fafb;
+  text-align: left;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dash-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+
+.dash-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-col-center {
+  width: 42px;
+  text-align: center;
+}
+
+/* Badge vai trò */
+.dash-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.dash-badge-green {
+  background: #e7f6ee;
+  color: #0f5132;
+}
+
+/* Nút icon nhỏ cho Action */
+.dash-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dash-icon-btn {
+  width: 32px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.dash-icon-btn:hover {
+  background: #f3f4f6;
+}
+ /* trạng thái menu đang active */
+.dash-menu-item.dash-active { background:#1f2937; color:#fff; }
+
+/* form actions (Save / Return) nằm trên cùng, bên phải */
+.dash-form-actions{
+  display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px;
+}
+
+/* khung form add */
+.dash-addform{
+  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+  padding:16px;
+}
+
+/* lưới 2 cột: label - field (giống ảnh) */
+.dash-form-grid{
+  display:grid; grid-template-columns: 220px 1fr;
+  column-gap: 18px; row-gap: 14px; align-items:center;
+}
+.dash-form-label{ color:#374151; font-weight:500; }
+.dash-w100{ width:100%; }
+
+/* input/select cỡ lớn giống UI */
+.dash-input-lg{ height:44px; }
+.dash-select-lg{ height:44px; }
+
+/* báo lỗi nhỏ dưới field */
+.dash-form-error{ color:#dc2626; font-size:12px; margin-top:4px; }
+
+/* (đã có) toolbar, input, select, btn, table… dùng lại các class dash- hiện có */
+
+.dash-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+/* Cột label - field */
+.dash-form-grid{
+  display:grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 16px;
+  align-items:center;
+}
+
+/* Ô field (cột bên phải) chừa 20px so với mép khung */
+.dash-form-grid > div:nth-child(2n){
+  box-sizing: border-box;       /* để padding không làm tràn */
+  padding-right: 40px;          /* ✅ cách mép phải 20px */
+}
+
+/* Input/Select đồng bộ kích thước */
+.dash-input-lg,
+.dash-select-lg{
+  height: 44px;                 /* cùng chiều cao */
+  border-radius: 10px;
+  width: 100%;                  /* full bề rộng trong cột field */
+  padding: 8px 12px;
+}
+
+/* (tuỳ chọn) Nếu muốn cả form chừa đều hai bên trong panel */
+.dash-addform{
+  padding: 16px 16px;           /* có thể đổi thành 16px 20px nếu muốn */
+}
 
 
 
