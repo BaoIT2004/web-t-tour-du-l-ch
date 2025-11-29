@@ -202,7 +202,7 @@ function CustomerMenu() {
 
 
      <div className="hp-dd-menu" role="menu">
-        {!user && (
+        {/* {!user && (
           <>
             <a className="hp-dd-item" href="/login" role="menuitem">
               Login
@@ -211,7 +211,7 @@ function CustomerMenu() {
               Signup
             </a>
           </>
-        )}
+        )} */}
 
         {user && (
           <>
