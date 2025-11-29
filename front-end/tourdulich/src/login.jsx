@@ -1,14 +1,37 @@
 import { useState } from "react";
 import "./App.css";
+import { useNavigate  } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Đăng nhập thành công");
+    try {
+      const res = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",  //Header này cho server biết rằng dữ liệu bạn gửi trong body là JSON
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      const data = await res.json();  //Lấy dữ liệu JSON mà server trả về → chuyển thành object JavaScript.
+      console.log("Response từ server:", data);
+      if(data){
+        //Lưu thông tin user
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/"); 
+      }
+    } catch (err) {
+      console.error("Lỗi khi gọi API:", err);
+      alert("Đăng nhập thất bại");
+    }
   };
 
   return (
