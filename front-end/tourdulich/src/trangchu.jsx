@@ -1,5 +1,6 @@
 import React from "react";
 import "./app.css"; // dùng chung css tổng
+import { data } from "react-router-dom";
 
 
 
@@ -154,6 +155,7 @@ function CustomerMenu() {
   const [user, setUser] = React.useState(null);
   const ref = React.useRef(null);
 
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
@@ -166,7 +168,7 @@ function CustomerMenu() {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        console.error(e);
+        console.error("Lỗi parse user từ localStorage", e);
       }
     }
   }, []);
@@ -186,6 +188,7 @@ function CustomerMenu() {
     };
   }, []);
 
+ 
   return (
     <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
       <button

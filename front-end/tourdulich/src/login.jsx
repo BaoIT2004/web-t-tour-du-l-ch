@@ -23,9 +23,12 @@ export default function Login() {
       });
       const data = await res.json();  //Lấy dữ liệu JSON mà server trả về → chuyển thành object JavaScript.
       console.log("Response từ server:", data);
-      if(data){
+      if (data) {
         //Lưu thông tin user
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify({
+          email: data.user.email
+        }));
+
         navigate("/"); 
       }
     } catch (err) {
