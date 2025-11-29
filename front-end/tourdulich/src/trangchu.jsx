@@ -1,5 +1,6 @@
 import React from "react";
 import "./app.css"; // dùng chung css tổng
+import { data } from "react-router-dom";
 
 
 
@@ -151,7 +152,25 @@ function Header() {
 /* -------- Dropdown Customer -------- */
 function CustomerMenu() {
   const [open, setOpen] = React.useState(false);
+  const [user, setUser] = React.useState(null);
   const ref = React.useRef(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    window.location.href = "/login"; 
+  };
+
+  React.useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error("Lỗi parse user từ localStorage", e);
+      }
+    }
+  }, []);
 
   React.useEffect(() => {
     const onDoc = (e) => {
@@ -176,19 +195,32 @@ function CustomerMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        Customer ▾
+        {/* Hiển thị email nếu có, nếu không thì "Customer" */}
+        {user ? `${user.email} ▾` : "Customer ▾"}
       </button>
+
       <div className="hp-dd-menu" role="menu">
-        <a className="hp-dd-item" href="/login" role="menuitem">
-          Login
-        </a>
-        <a className="hp-dd-item" href="/signup" role="menuitem">
-          Signup
-        </a>
+        {!user ? (
+          <>
+            <a className="hp-dd-item" href="/login" role="menuitem">
+              Login
+            </a>
+            <a className="hp-dd-item" href="/signup" role="menuitem">
+              Signup
+            </a>
+          </>
+        ) : (
+          <>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 }
+
 
 /* -------- Hero + Tabs + Search -------- */
 function HeroSearch() {
