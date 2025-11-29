@@ -473,6 +473,146 @@ input[type="password"]:focus {
 .hp-dd-item{ display:block; padding:10px 16px; text-decoration:none; color:#111; font-weight:500; }
 .hp-dd-item:hover{ background:#f4f6fb; }
 .hp-dd.open > .hp-pill{ outline:2px solid #1a73e8; }
+/*nút logout*/
+.signup-header {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2563eb; /* xanh dương */
+  margin: 0 0 6px;
+}
+
+.signup-subtitle {
+  color: #6b7280; /* xám nhẹ */
+  font-size: 15px;
+  margin: 0 0 30px;
+}
+
+.logout-btn {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  color: red; /* chỉ đổi màu chữ */
+}
+
+.signup-page {
+  padding: 40px 16px 60px;
+  display: flex;
+  justify-content: center;
+  background: #f9fafb;
+  font-family: Arial, sans-serif;
+}
+
+.signup-card {
+  background: #fff;
+  width: 100%;
+  max-width: 1100px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.signup-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: #111827;
+}
+
+/* grid giống ảnh: 2 cột, khoảng cách đều */
+.signup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px; /* khoảng cách ngang giữa 2 cột */
+  row-gap: 5px;    /* khoảng cách dọc giữa các hàng ✅ */
+}
+
+.signup-col-2 {
+  grid-column: 1 / -1;
+  margin-bottom: 20px; /* đảm bảo cách đều khi hàng chiếm 2 cột */
+}
+
+
+.signup-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+ 
+  color: #111827;
+  
+}
+
+.signup-field input,
+.signup-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.signup-field input:focus,
+.signup-field select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+/* errors */
+.signup-err {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+/* button */
+.signup-actions { grid-column: 1 / 2; margin-top: 4px; }
+.signup-btn {
+  padding: 10px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.signup-btn:hover { background: #1e40af; }
+
+/* responsive */
+@media (max-width: 720px) {
+  .signup-grid { grid-template-columns: 1fr; }
+  .signup-actions { grid-column: 1 / -1; }
+}
+/* căn giữa checkbox */
+.signup-container {
+  justify-content: center;
+}
+.options {
+  display: flex;
+  flex-direction: column; /* 👈 giúp lỗi nằm ngay dưới checkbox */
+  align-items: flex-start; /* căn trái */
+  gap: 4px; /* khoảng cách nhỏ giữa checkbox và lỗi */
+}
+
+/* căn giữa nút */
+.signup-container button.login-btn {
+  display: inline-block;
+  width: auto;
+  min-width: 200px;
+}
+
+
 
 /* ==== GRID CHO FORM HOTEL TRONG HERO ==== */
 
@@ -1238,8 +1378,8 @@ input[type="password"]:focus {
 .hero-car p{color:white; margin:0 0 18px}
 
 /* ===========================
-   HOTEL DETAIL (namespaced .ht-)
-   =========================== */
+  HOTEL DETAIL (namespaced .ht-)
+  =========================== */
 /* ===================== */
 /*      HOTEL ROOMS      */
 /* ===================== */
