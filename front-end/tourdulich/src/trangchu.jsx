@@ -1,6 +1,6 @@
 import React from "react";
 import "./app.css"; // dùng chung css tổng
-import { data } from "react-router-dom";
+
 
 
 

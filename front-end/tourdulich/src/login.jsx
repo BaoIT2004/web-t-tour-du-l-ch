@@ -9,7 +9,7 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert("Đăng nhập thành công");
-  };
+  };  
 
   return (
     <div className="login-page">
