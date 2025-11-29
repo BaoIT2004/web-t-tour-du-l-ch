@@ -1,11 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./Dashboard.css";
 
-const INITIAL_USERS = [
-  { id: 1, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Admin", password: "123456" },
-  { id: 2, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "abcdef" },
-  { id: 3, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "qwerty" },
-];
+
+// const INITIAL_USERS = [
+//   { id: 1, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Admin", password: "123456" },
+//   { id: 2, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "abcdef" },
+//   { id: 3, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "qwerty" },
+// ];
+
 
 // ---- form rỗng cho Add (NEW) ----
 const EMPTY_FORM = {
@@ -23,25 +25,52 @@ const Qluser = () => {
   const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
 
   // ===== Users list =====
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [field, setField] = useState("all");
 
+  // LẤY DỮ LIỆU TỪ NODE QUA CORS
+  useEffect(() => {
+    fetch("http://localhost:3000/api/getUser")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("DỮ LIỆU TỪ BACKEND:", data);
+
+        const incoming = data.users;
+
+        if (Array.isArray(incoming)) {
+          setUsers(incoming);          // đã là mảng
+        } else if (incoming) {
+          setUsers([incoming]);        // là object → cho vào 1 mảng
+        } else {
+          setUsers([]);                // không có gì
+        }
+      })
+      .catch((err) => console.log("Lỗi fetch:", err));
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter((u) => {
-      const values = {
-        firstName: (u.firstName || "").toLowerCase(),
-        lastName: (u.lastName || "").toLowerCase(),
-        email: (u.email || "").toLowerCase(),
-        phone: (u.phone || "").toLowerCase(),
-        role: (u.role || "").toLowerCase(),
-      };
-      if (field === "all") return Object.values(values).some((v) => v.includes(q));
-      return values[field]?.includes(q);
-    });
-  }, [users, query, field]);
+
+  // Không nhập gì thì hiện tất cả user
+  if (!q) return users;   
+
+  return users.filter((u) => {
+    const values = {
+      firstName: (u.firstName || "").toLowerCase(),
+      lastName: (u.lastName || "").toLowerCase(),
+      email: (u.email || "").toLowerCase(),
+      phone: (u.phonenumber || "").toLowerCase(),
+      role: (u.roleid || "").toLowerCase(),
+    };
+    if (field === "all") return Object.values(values).some((v) => v.includes(q));
+    return values[field]?.includes(q);
+  });
+}, [users, query, field]);
+
+
+
+  // Xóa
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
@@ -70,8 +99,8 @@ const Qluser = () => {
       email: user.email || "",
       // password không dùng khi sửa, nhưng vẫn giữ field trong state
       password: "",
-      phone: user.phone || "",
-      role: user.role || "",
+      phone: user.phonenumber || "",
+      role: user.roleid || "",
       currency: "",
     });
     setErrors({});
@@ -126,15 +155,15 @@ const Qluser = () => {
         prev.map((u) =>
           u.id === editUserId
             ? {
-                ...u,
-                firstName: form.firstName,
-                lastName: form.lastName,
-                email: form.email,
-                phone: form.phone,
-                role: form.role,
-                // ✅ KHÔNG thay đổi password khi sửa
-                password: u.password,
-              }
+              ...u,
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              role: form.role,
+              // ✅ KHÔNG thay đổi password khi sửa
+              password: u.password,
+            }
             : u
         )
       );
@@ -170,7 +199,7 @@ const Qluser = () => {
             Transactions
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-hotel"></i>
+            <i className="fa-solid fa-hotel"></i>
             Hotels
           </button>
           <button className="dash-menu-item">
@@ -182,11 +211,11 @@ const Qluser = () => {
             Cars
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-comment"></i>
+            <i className="fa-solid fa-comment"></i>
             Reviews
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-blog"></i>
+            <i className="fa-solid fa-blog"></i>
             Blogs
           </button>
           <button className="dash-menu-item">
@@ -195,29 +224,29 @@ const Qluser = () => {
           </button>
         </nav>
         <div className="dash-sidebar-footer">
-  {/* Nút Admin */}
-        <button className="dash-user-info" onClick={toggleUserMenu}>
+          {/* Nút Admin */}
+          <button className="dash-user-info" onClick={toggleUserMenu}>
             <div className="dash-avatar">
-            <i className="fa-regular fa-user" />
+              <i className="fa-regular fa-user" />
             </div>
             <div className="dash-avatar-label">
-            <span>Admin</span>
-            <span>online</span>
+              <span>Admin</span>
+              <span>online</span>
             </div>
-        </button>
+          </button>
 
-        {/* Menu xổ ra */}
-        {isUserMenuOpen && (
+          {/* Menu xổ ra */}
+          {isUserMenuOpen && (
             <div className="dash-user-menu">
-            <button className="dash-user-menu-item">Dashboard</button>
-            <button className="dash-user-menu-item">Settings</button>
-            <button className="dash-user-menu-item">Profile</button>
-            <div className="dash-user-menu-divider" />
-            <button className="dash-user-menu-item dash-user-menu-logout">
+              <button className="dash-user-menu-item">Dashboard</button>
+              <button className="dash-user-menu-item">Settings</button>
+              <button className="dash-user-menu-item">Profile</button>
+              <div className="dash-user-menu-divider" />
+              <button className="dash-user-menu-item dash-user-menu-logout">
                 Logout
-            </button>
+              </button>
             </div>
-        )}
+          )}
         </div>
 
       </aside>
@@ -303,11 +332,11 @@ const Qluser = () => {
                     <select
                       className="dash-select dash-select-lg dash-w100"
                       value={form.role}
-                      onChange={(e) => change("role", e.target.value)}
+                      onChange={(e) => change("role", Number(e.target.value))}
                     >
                       <option value="">- None -</option>
-                      <option value="Admin">Admin</option>
-                      <option value="Customer">Customer</option>
+                      <option value={1}>Admin</option>
+                      <option value={2}>Customer</option>
                     </select>
                     {errors.role && <div className="dash-form-error">{errors.role}</div>}
                   </div>
@@ -361,9 +390,9 @@ const Qluser = () => {
                         <td>{u.firstName}</td>
                         <td>{u.lastName}</td>
                         <td><a className="dash-link" href={`mailto:${u.email}`}>{u.email}</a></td>
-                        <td>{u.password ? "••••••" : ""}</td>
-                        <td>{u.phone}</td>
-                        <td>{u.role}</td>
+                        <td>{u.password}</td>
+                        <td>{u.phonenumber}</td>
+                        <td>{u.roleid == 1 ? "Admin" : u.roleid == 2 ? "Customer" : "Unknown"}</td>
                         <td style={{ textAlign: "right" }}>
                           <button
                             className="dash-btn dash-btn-icon"
