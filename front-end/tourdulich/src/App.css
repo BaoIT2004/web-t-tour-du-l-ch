@@ -1332,8 +1332,8 @@ input[type="password"]:focus {
   width: 100%;
   background: #2a5bd5;
   color: #e7ebf3;
-  margin-top: 0;              /* ❌ bỏ khoảng đen bên ngoài */
-  padding: 80px 0 25px;       /* ✅ vẫn giữ 80px khoảng trống bên trong footer */
+  margin-top: 0;         
+  padding: 80px 0 25px;       
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -1635,6 +1635,11 @@ input[type="password"]:focus {
 
 /* Nút Đặt ngay */
 .ht-btn-outline {
+  display: flex;              /* dùng flex để căn giữa */
+  align-items: center;        /* căn giữa theo chiều dọc */
+  justify-content: center;     /* giúp a thành nút */
+  text-decoration: none;      /* bỏ gạch chân */
+  color: #111827;             /* chữ đen mặc định */
   justify-self: end;
   padding: 6px 16px;
   border-radius: 999px;
@@ -1642,16 +1647,16 @@ input[type="password"]:focus {
   background: #f9fafb;
   font-size: 13px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .ht-btn-outline:hover {
   background: #2563eb;
   border-color: #2563eb;
-  color: #ffffff;
+  color: #ffffff !important;   /* đảm bảo chữ trắng */
 }
-/* ===================== */
-/*       REVIEWS          */
-/* ===================== */
+
+
 
 /* ===================== */
 /*  HOTEL DETAIL LAYOUT  */
@@ -2098,4 +2103,595 @@ input[type="password"]:focus {
   background: #1e40af;
 }
   
+/* Hàng dữ liệu mỗi phòng */
+.ht-room-item {
+  display: grid;
+  grid-template-columns: minmax(0, 320px) 140px 1fr 130px;
+  align-items: center;
+  padding: 16px 18px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
 
+/* Cột 1: ảnh + tiêu đề phòng */
+.ht-room-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ht-room-img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.ht-room-info h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Cột 2: số người */
+.ht-room-people {
+  text-align: center;
+  color: #4b5563;
+  font-size: 14px;
+  margin-left: 80px;
+}
+
+/* Cột 3: giá */
+.ht-room-price {
+  text-align: center;
+  font-weight: 600;
+  color: #111827;
+  margin-left: 80px;
+}
+
+
+
+/* ===========================
+   TOUR DETAIL (prefix .tt-)
+   =========================== */
+
+/* nền xám nhẹ phía sau hero */
+.tt-main {
+  padding-top: 90px;      /* tránh bị header fixed che */
+  padding-bottom: 20px;
+ 
+}
+
+/* hero box: ảnh + form */
+.tt-hero-box {
+  background: #e5e7eb;
+  padding: 20px 0 0;
+  padding-bottom: 15px;
+  padding-top: 20px;
+  border-radius: 20px;
+}
+
+.tt-hero-grid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 16px;
+  padding: 0 16px 12px;
+}
+
+.tt-hero-image img {
+  width: 100%;
+  height: 390px;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #d1d5db;
+}
+
+/* form bên phải */
+.tt-hero-form {
+  background: #f9fafb;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #111827;
+}
+
+.tt-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tt-form-group label {
+  font-weight: 500;
+}
+
+.tt-input,
+.tt-select {
+  height: 30px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  outline: none;
+}
+
+.tt-input:focus,
+.tt-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* ô giá */
+.tt-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-weight: 600;
+  color: #111827;
+}
+
+.tt-price-box small {
+  font-weight: 400;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* nút đặt ngay */
+.tt-btn-primary {
+  margin-top: 6px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tt-btn-primary:hover {
+  filter: brightness(.95);
+}
+
+/* =====================
+   SECTIONS: schedule + reviews
+   ===================== */
+
+.tt-section-box {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+ 
+  margin-bottom: 32px;
+}
+
+.tt-section-header {
+  padding: 8px 16px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* ----- Tiến trình tour ----- */
+
+.tt-steps-card {
+  padding: 10px 12px 12px;
+}
+
+.tt-step-item + .tt-step-item {
+  margin-top: 6px;
+}
+
+.tt-step-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tt-step-header-open {
+  background: #e5e7eb;
+}
+
+.tt-step-chevron {
+  font-size: 12px;
+}
+
+.tt-step-body {
+  margin-top: 6px;
+  padding: 8px 14px 10px;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* ----- Reviews list ----- */
+
+.tt-reviews-card {
+  border-top: none;
+}
+
+.tt-review-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #edf1f7;
+  background: #f9fafb;
+}
+
+.tt-review-item:nth-child(odd) {
+  background: #f3f4f6;
+}
+
+.tt-review-item:last-child {
+  border-bottom: none;
+}
+
+.tt-review-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.tt-review-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: #111827;
+}
+
+.tt-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tt-review-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tt-review-stars {
+  color: #f59e0b;
+  font-size: 12px;
+}
+
+.tt-review-body p {
+  margin: 2px 0 0;
+  color: #4b5563;
+}
+
+/* nút + Thêm đánh giá */
+.tt-review-add {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 12px;
+}
+
+.tt-btn-light {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tt-btn-light:hover {
+  background: #e5e7eb;
+}
+
+/* =====================
+   FORM ĐÁNH GIÁ (MODAL)
+   ===================== */
+
+.tt-review-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.tt-review-modal {
+  width: 420px;
+  background: #ffffff;
+  color: #111111;
+  border-radius: 14px;
+  padding: 22px 26px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  animation: ttFadeIn .25s ease;
+}
+
+@keyframes ttFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tt-review-modal-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.tt-review-form-row-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tt-review-form-icon {
+  font-size: 18px;
+}
+
+.tt-review-label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+}
+
+.tt-review-input,
+.tt-review-textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #111;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.tt-review-input:focus,
+.tt-review-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+}
+
+.tt-review-textarea {
+  height: 110px;
+  resize: none;
+}
+
+.tt-review-stars-input {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tt-star-btn {
+  border: none;
+  background: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #d1d5db;
+  padding: 0;
+}
+
+.tt-star-btn-active {
+  color: #f5b300;
+}
+
+.tt-star-btn:hover {
+  transform: scale(1.15);
+}
+
+.tt-review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+.tt-step-title,
+.tt-step-chevron {
+  cursor: pointer;
+}
+
+/* ===== thanh toán PAGE ===== */
+
+.pay-main {
+  margin-top: 40px;          /* tránh bị header fixed che */
+  margin-bottom: 60px;
+}
+
+.pay-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+.pay-card {
+  max-width: 640px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 22px 26px 30px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+/* từng block: Thông tin người đặt / du khách / thanh toán */
+.pay-section + .pay-section {
+  margin-top: 20px;
+}
+
+.pay-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+/* lưới 2 cột, 3 cột */
+.pay-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.pay-grid-3 {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr;
+  gap: 12px 16px;
+}
+
+.pay-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.pay-field label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.pay-field-full {
+  margin-top: 12px;
+}
+
+/* input chung */
+.pay-input {
+  width: 100%;
+  height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.pay-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* phương thức thanh toán */
+.pay-paymethods {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pay-method-btn {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pay-method-btn-active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.pay-total-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.pay-total-label {
+  margin-right: 6px;
+  color: #6b7280;
+}
+
+.pay-total-value {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* điều khoản + nút thanh toán */
+.pay-agree-row {
+  margin-top: 16px;
+}
+
+.pay-agree {
+  font-size: 13px;
+  color: #374151;
+}
+
+.pay-agree input {
+  margin-right: 6px;
+}
+
+.pay-submit-row {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.pay-submit-btn {
+  min-width: 260px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pay-submit-btn:hover {
+  background: #1e40af;
+}
+
+/* link "Đặt ngay" dùng như button */
+.ht-btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: inherit;
+}
+.simple-header {
+  width: 100%;
+  background: #4874cb;     /* màu xám nhạt giống hình */
+  padding-top: 30px;
+  padding-bottom: 30px;
+
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid #d1d5db;
+}

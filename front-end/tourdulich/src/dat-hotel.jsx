@@ -123,7 +123,7 @@ const ROOM_LIST = [
       id: 1,
   
 title: "Phòng thường",
-people: "0 người",
+people: "2 người",
 price: "000,000 VND",
 img: "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=800",
 },
@@ -257,22 +257,34 @@ return (
 
         {ROOM_LIST.map((room) => (
           <div key={room.id} className="ht-room-item">
-            <img
-              className="ht-room-img"
-              src={room.img}
-              alt={room.title}
-            />
+            {/* Cột 1: Ảnh + tên phòng */}
+            <div className="ht-room-main">
+              <img
+                className="ht-room-img"
+                src={room.img}
+                alt={room.title}
+              />
 
-            <div className="ht-room-info">
-              <h3>{room.title}</h3>
-              <p>{room.people}</p>
+              <div className="ht-room-info">
+                <h3>{room.title}</h3>
+              </div>
             </div>
 
-            <div className="ht-room-price">{room.price}</div>
+            {/* Cột 2: Số người */}
+            <div className="ht-room-people">
+              {room.people}
+            </div>
 
+            {/* Cột 3: Giá */}
+            <div className="ht-room-price">
+              {room.price}
+            </div>
+
+            {/* Cột 4: Nút */}
             <button className="ht-btn-outline">Đặt ngay</button>
           </div>
         ))}
+
       </div>
     </div>
   </div>
@@ -431,7 +443,7 @@ function HotelReviews() {
   
 
 
-   /* -------- Footer -------- */
+   /* -------- Footer -------- */ 
 function Footer() {
     return (
       <footer className="hp-footer">
