@@ -75,10 +75,27 @@ const Qluser = () => {
     });
   }, [users, query, field]);
 
-  // Xóa (mới xóa trên FE)
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
-      setUsers((prev) => prev.filter((x) => x.id !== id));
+  // Xóa
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch("http://localhost:3000/api/delete-user", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      console.log(data);
+
+      if (data.errCode === 0) {
+        if (window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
+          setUsers((prev) => prev.filter((x) => x.id !== id));
+        }
+      } else {
+        alert("Xóa không thành công");
+      }
+    } catch (e) {
+      console.error("Delete Error:", e);
+      alert("Lỗi server!");
     }
   };
 
@@ -116,91 +133,86 @@ const Qluser = () => {
       ...f,
       [name]: value,
     }));
-
   const validate = () => {
-    const e = {};
-    if (!form.firstName.trim()) e.firstName = "First name is required";
-    if (!form.lastName.trim()) e.lastName = "Last name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Invalid email";
-
-    // ✅ Password chỉ bắt buộc khi THÊM MỚI
-    if (!form.password?.trim() && !editUserId) {
-      e.password = "Password is required";
-    }
-
-    if (!form.role) e.role = "User type is required";
-    return e;
-  };
-
-
-  // thêm
-  // thêm / sửa
-const saveAdd = async () => {
-  const errs = validate();       // chạy validate
-  setErrors(errs);               // đẩy lỗi ra form
-
-  if (Object.keys(errs).length > 0) return;  // có lỗi thì dừng
-
+  const e = {};
+  // First Name
+  if (!form.firstName.trim()) 
+    e.firstName = "First name is required";
+  // Last Name
+  if (!form.lastName.trim()) 
+    e.lastName = "Last name is required";
+  // Email
+  if (!form.email.trim()) 
+    e.email = "Email is required";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) 
+    e.email = "Invalid email";
+  // Password (chỉ bắt buộc khi thêm mới)
   if (!editUserId) {
-    // === THÊM MỚI ===
-    try {
-      const res = await fetch("http://localhost:3000/api/creat-new-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          password: form.password,
-          address: form.address,
-          phoneNumber: form.phone,
-          gender: form.gender,
-        }),
-      });
+    if (!form.password.trim()) 
+      e.password = "Password is required";
+    else if (form.password.length < 6)
+      e.password = "Password must be at least 6 characters";
+  }
+  // Address
+  if (!form.address.trim()) 
+    e.address = "Address is required";
+  // Phone
+  if (!form.phone.trim()) 
+    e.phone = "Phone is required";
+  else if (!/^\d{9,11}$/.test(form.phone)) 
+    e.phone = "Phone must be 9–11 digits";
+  // Gender
+  if (!form.gender.trim()) 
+    e.gender = "Gender is required";
+  // User Type (role)
+  if (!form.role) 
+    e.role = "User type is required";
+  return e;
+};
 
-      const data = await res.json();
-      console.log("Response từ server:", data);
+  // Thêm / Sửa
+  const saveAdd = async () => {
+    const errs = validate();       // chạy validate
+    setErrors(errs);               // đẩy lỗi ra form
 
-      if (data.errCode === 1) {
-        alert("Email đã tồn tại");
-        return;
-      }
+    if (Object.keys(errs).length > 0) return;  // có lỗi thì dừng
 
-      if (data.errCode === 0) {
-        alert("Thêm thành công");
-
-        // cập nhật list trên FE
-        setUsers((prev) => [
-          ...prev,
-          data.user || {
-            id: Date.now(),
+    // =============== THÊM MỚI ===============
+    if (!editUserId) {
+      try {
+        const res = await fetch("http://localhost:3000/api/creat-new-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             firstName: form.firstName,
             lastName: form.lastName,
             email: form.email,
+            password: form.password,
             address: form.address,
-            phonenumber: form.phone,
+            phoneNumber: form.phone,
             gender: form.gender,
             roleid: form.role,
-            password: form.password,
-          },
-        ]);
+          }),
+        });
 
-        closeAdd();
-      }
-    } catch (err) {
-      console.error("Lỗi khi gọi API:", err);
-      alert("Thêm thất bại");
-    }
-  } else {
-    // === CẬP NHẬT (SỬA) ===
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === editUserId
-          ? {
-              ...u,
+        const data = await res.json();
+        console.log("Response từ server (create):", data);
+
+        if (data.errCode === 1) {
+          alert("Email đã tồn tại");
+          return;
+        }
+
+        if (data.errCode === 0) {
+          alert("Thêm thành công");
+
+          // cập nhật list trên FE
+          setUsers((prev) => [
+            ...prev,
+            data.user || {
+              id: Date.now(),
               firstName: form.firstName,
               lastName: form.lastName,
               email: form.email,
@@ -208,15 +220,73 @@ const saveAdd = async () => {
               phonenumber: form.phone,
               gender: form.gender,
               roleid: form.role,
-              password: u.password, // giữ nguyên
-            }
-          : u
-      )
-    );
-    closeAdd();
-  }
-};
+              password: form.password,
+            },
+          ]);
 
+          closeAdd();
+          setEditUserId(null);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API:", err);
+        alert("Thêm thất bại");
+      }
+    } else {
+      // =============== CẬP NHẬT (SỬA) ===============
+      try {
+        const res = await fetch("http://localhost:3000/api/edit-user", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: editUserId, // gửi ID user lên backend
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            address: form.address,
+            phoneNumber: form.phone,
+            gender: form.gender,
+            roleid: form.role,
+          }),
+        });
+
+        const data = await res.json();
+        console.log("Response từ server (edit):", data);
+
+        if (data.errCode !== 0) {
+          alert(data.errMessage || "Cập nhật thất bại");
+          return;
+        }
+
+        alert("Cập nhật thành công");
+
+        // Cập nhật FE list
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editUserId
+              ? {
+                  ...u,
+                  firstName: form.firstName,
+                  lastName: form.lastName,
+                  email: form.email,
+                  address: form.address,
+                  phonenumber: form.phone,
+                  gender: form.gender,
+                  roleid: form.role,
+                }
+              : u
+          )
+        );
+
+        closeAdd();
+        setEditUserId(null); // reset về mode thêm mới
+      } catch (error) {
+        console.error("Lỗi khi edit user:", error);
+        alert("Có lỗi xảy ra khi cập nhật user");
+      }
+    }
+  };
 
   return (
     <div className="dash-page">
@@ -475,6 +545,7 @@ const saveAdd = async () => {
                       <th>Email</th>
                       <th>Address</th>
                       <th>Phone</th>
+                      <th>Gender</th>
                       <th>User type</th>
                       <th style={{ width: 100, textAlign: "right" }}>
                         Actions
@@ -494,6 +565,7 @@ const saveAdd = async () => {
                         </td>
                         <td>{u.address}</td>
                         <td>{u.phonenumber}</td>
+                        <td>{u.gender || "Unknown"}</td>
                         <td>
                           {u.roleid == 1
                             ? "Admin"

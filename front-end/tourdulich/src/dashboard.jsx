@@ -1,11 +1,48 @@
 // src/pages/Dashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
-const Dashboard = () => {
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-    const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
+const Dashboard = () => {
+  const navigate = useNavigate();
+
+  // State mở/đóng menu
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // State dữ liệu từ API
+  const [counts, setCounts] = useState({
+    users: 0,
+    pages: 0,
+    bookings: 0,
+    cancelledBookings: 0,
+    unpaidBookings: 0,
+    pendingTransactions: 0,
+  });
+
+  // Lấy dữ liệu từ API
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/count");
+        const data = await res.json();
+        console.log("API DATA:", data);
+
+        // API: { errCode, toltal, errMessage }
+        setCounts((prev) => ({
+          ...prev,
+          users: data.toltal ?? 0, // dùng đúng field "toltal"
+        }));
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
+
   return (
     <div className="dash-page">
       {/* SIDEBAR */}
@@ -19,12 +56,12 @@ const Dashboard = () => {
             <i className="fa-regular fa-bell" />
             Alerts
           </button>
-          <button className="dash-menu-item">
+          <button className="dash-menu-item" onClick={() => navigate("/qluser")} >
             <i className="fa-regular fa-user" />
             Users
           </button>
 
-          <button className="dash-menu-item">
+          <button className="dash-menu-item" >
             <i className="fa-regular fa-calendar-check" />
             Bookings
           </button>
@@ -33,7 +70,7 @@ const Dashboard = () => {
             Transactions
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-hotel"></i>
+            <i className="fa-solid fa-hotel" />
             Hotels
           </button>
           <button className="dash-menu-item">
@@ -45,11 +82,11 @@ const Dashboard = () => {
             Cars
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-comment"></i>
+            <i className="fa-solid fa-comment" />
             Reviews
           </button>
           <button className="dash-menu-item">
-          <i class="fa-solid fa-blog"></i>
+            <i className="fa-solid fa-blog" />
             Blogs
           </button>
           <button className="dash-menu-item">
@@ -57,32 +94,32 @@ const Dashboard = () => {
             Settings
           </button>
         </nav>
+
         <div className="dash-sidebar-footer">
-  {/* Nút Admin */}
-        <button className="dash-user-info" onClick={toggleUserMenu}>
+          {/* Nút Admin */}
+          <button className="dash-user-info" onClick={toggleUserMenu}>
             <div className="dash-avatar">
-            <i className="fa-regular fa-user" />
+              <i className="fa-regular fa-user" />
             </div>
             <div className="dash-avatar-label">
-            <span>Admin</span>
-            <span>online</span>
+              <span>Admin</span>
+              <span>online</span>
             </div>
-        </button>
+          </button>
 
-        {/* Menu xổ ra */}
-        {isUserMenuOpen && (
+          {/* Menu xổ ra */}
+          {isUserMenuOpen && (
             <div className="dash-user-menu">
-            <button className="dash-user-menu-item">Dashboard</button>
-            <button className="dash-user-menu-item">Settings</button>
-            <button className="dash-user-menu-item">Profile</button>
-            <div className="dash-user-menu-divider" />
-            <button className="dash-user-menu-item dash-user-menu-logout">
+              <button className="dash-user-menu-item">Dashboard</button>
+              <button className="dash-user-menu-item">Settings</button>
+              <button className="dash-user-menu-item">Profile</button>
+              <div className="dash-user-menu-divider" />
+              <button className="dash-user-menu-item dash-user-menu-logout">
                 Logout
-            </button>
+              </button>
             </div>
-        )}
+          )}
         </div>
-
       </aside>
 
       {/* MAIN */}
@@ -101,17 +138,17 @@ const Dashboard = () => {
                   <i className="fa-regular fa-user" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">{counts.users}</div>
             </div>
 
             <div className="dash-stat-card dash-stat-blue">
               <div className="dash-stat-title">
-                Pages
+                Tours
                 <div className="dash-stat-icon">
                   <i className="fa-regular fa-file-lines" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">{counts.pages}</div>
             </div>
 
             <div className="dash-stat-card dash-stat-green">
@@ -121,7 +158,7 @@ const Dashboard = () => {
                   <i className="fa-regular fa-calendar-check" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">{counts.bookings}</div>
             </div>
 
             <div className="dash-stat-card dash-stat-red">
@@ -131,7 +168,7 @@ const Dashboard = () => {
                   <i className="fa-regular fa-circle-xmark" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">{counts.cancelledBookings}</div>
             </div>
 
             <div className="dash-stat-card dash-stat-yellow">
@@ -141,7 +178,7 @@ const Dashboard = () => {
                   <i className="fa-regular fa-credit-card" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">{counts.unpaidBookings}</div>
             </div>
 
             <div className="dash-stat-card dash-stat-purple">
@@ -151,7 +188,9 @@ const Dashboard = () => {
                   <i className="fa-regular fa-clock" />
                 </div>
               </div>
-              <div className="dash-stat-value">0</div>
+              <div className="dash-stat-value">
+                {counts.pendingTransactions}
+              </div>
             </div>
           </div>
 
@@ -199,7 +238,7 @@ const Dashboard = () => {
                 <i className="fa-solid fa-chevron-right" />
               </button>
 
-              <button className="dash-module-item">
+              <button className="dash-module-item" onClick={() => navigate("/qluser")} >
                 <span>
                   <i className="fa-regular fa-user" />
                   Quản lí tài khoản
