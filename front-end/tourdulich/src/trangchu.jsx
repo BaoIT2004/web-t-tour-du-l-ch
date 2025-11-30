@@ -1,6 +1,5 @@
 import React from "react";
 import "./app.css"; // dùng chung css tổng
-import { data } from "react-router-dom";
 
 
 
@@ -141,14 +140,10 @@ function CustomerMenu() {
   const [user, setUser] = React.useState(null);
   const ref = React.useRef(null);
 
-
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
     window.location.href = "/login"; 
-  }
-
-    React.useEffect(() => {
   };
 
   React.useEffect(() => {
@@ -177,7 +172,6 @@ function CustomerMenu() {
     };
   }, []);
 
- 
   return (
     <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
       <button
@@ -186,12 +180,6 @@ function CustomerMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-         {user ?`${user.name} ▾`: "Customer ▾"}
-      </button>
-
-
-     <div className="hp-dd-menu" role="menu">
-        {/* {!user && (
         {/* Hiển thị email nếu có, nếu không thì "Customer" */}
         {user ? `${user.email} ▾` : "Customer ▾"}
       </button>
@@ -206,13 +194,6 @@ function CustomerMenu() {
               Signup
             </a>
           </>
-        )} */}
-
-        {user && (
-          <>
-            <span className="hp-dd-item">{user.email}</span>
-            <button className="hp-dd-item" onClick={handleLogout}>
-=======
         ) : (
           <>
             <button className="logout-btn" onClick={handleLogout}>
@@ -222,8 +203,8 @@ function CustomerMenu() {
         )}
       </div>
     </div>
-  )
-};
+  );
+}
 
 
 /* -------- Hero + Tabs + Search -------- */
@@ -997,5 +978,3 @@ export default function TrangChu() {
     </div>
   );
 }
-
-
