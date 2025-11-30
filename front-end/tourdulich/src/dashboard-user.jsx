@@ -1,21 +1,15 @@
 import React, { useMemo, useState, useEffect } from "react";
 import "./Dashboard.css";
 
-
-// const INITIAL_USERS = [
-//   { id: 1, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Admin", password: "123456" },
-//   { id: 2, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "abcdef" },
-//   { id: 3, firstName: "Phạm", lastName: "Minh Quân", email: "pmgkks@gmail.com", phone: "039664897", role: "Customer", password: "qwerty" },
-// ];
-
-
 // ---- form rỗng cho Add (NEW) ----
 const EMPTY_FORM = {
   firstName: "",
   lastName: "",
   email: "",
   password: "",
+  address: "",
   phone: "",
+  gender: "",
   role: "",
   currency: "",
 };
@@ -29,6 +23,12 @@ const Qluser = () => {
   const [query, setQuery] = useState("");
   const [field, setField] = useState("all");
 
+  // ====== Add/Edit form ======
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
+  const [editUserId, setEditUserId] = useState(null); // null = thêm, khác null = sửa
+
   // LẤY DỮ LIỆU TỪ NODE QUA CORS
   useEffect(() => {
     fetch("http://localhost:3000/api/getUser")
@@ -39,50 +39,48 @@ const Qluser = () => {
         const incoming = data.users;
 
         if (Array.isArray(incoming)) {
-          setUsers(incoming);          // đã là mảng
+          setUsers(incoming); // đã là mảng
         } else if (incoming) {
-          setUsers([incoming]);        // là object → cho vào 1 mảng
+          setUsers([incoming]); // là object → cho vào 1 mảng
         } else {
-          setUsers([]);                // không có gì
+          setUsers([]); // không có gì
         }
       })
       .catch((err) => console.log("Lỗi fetch:", err));
   }, []);
 
+  // ===== FILTER / SEARCH =====
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    if (!q) return users;
 
-  // Không nhập gì thì hiện tất cả user
-  if (!q) return users;   
+    return users.filter((u) => {
+      const roleText =
+        u.roleid == 1 ? "admin" :
+        u.roleid == 2 ? "customer" : "";
 
-  return users.filter((u) => {
-    const values = {
-      firstName: (u.firstName || "").toLowerCase(),
-      lastName: (u.lastName || "").toLowerCase(),
-      email: (u.email || "").toLowerCase(),
-      phone: (u.phonenumber || "").toLowerCase(),
-      role: (u.roleid || "").toLowerCase(),
-    };
-    if (field === "all") return Object.values(values).some((v) => v.includes(q));
-    return values[field]?.includes(q);
-  });
-}, [users, query, field]);
+      const values = {
+        firstName: (u.firstName || "").toLowerCase(),
+        lastName: (u.lastName || "").toLowerCase(),
+        email: (u.email || "").toLowerCase(),
+        address: (u.address || "").toLowerCase(),
+        phone: (u.phonenumber || "").toLowerCase(),
+        role: roleText,
+      };
 
+      if (field === "all") {
+        return Object.values(values).some((v) => v.includes(q));
+      }
+      return values[field]?.includes(q);
+    });
+  }, [users, query, field]);
 
-
-  // Xóa
-
+  // Xóa (mới xóa trên FE)
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
       setUsers((prev) => prev.filter((x) => x.id !== id));
     }
   };
-
-  // ====== Add/Edit form ======
-  const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState({});
-  const [editUserId, setEditUserId] = useState(null); // null = thêm, khác null = sửa
 
   const openAdd = () => {
     setForm(EMPTY_FORM);
@@ -97,9 +95,10 @@ const Qluser = () => {
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       email: user.email || "",
-      // password không dùng khi sửa, nhưng vẫn giữ field trong state
-      password: "",
+      password: "", // không sửa password ở đây
+      address: user.address || "",
       phone: user.phonenumber || "",
+      gender: user.gender || "",
       role: user.roleid || "",
       currency: "",
     });
@@ -112,7 +111,11 @@ const Qluser = () => {
     setErrors({});
   };
 
-  const change = (name, value) => setForm((f) => ({ ...f, [name]: value }));
+  const change = (name, value) =>
+    setForm((f) => ({
+      ...f,
+      [name]: value,
+    }));
 
   const validate = () => {
     const e = {};
@@ -122,7 +125,7 @@ const Qluser = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Invalid email";
 
     // ✅ Password chỉ bắt buộc khi THÊM MỚI
-    if (!form.password.trim() && !editUserId) {
+    if (!form.password?.trim() && !editUserId) {
       e.password = "Password is required";
     }
 
@@ -130,47 +133,90 @@ const Qluser = () => {
     return e;
   };
 
-  const saveAdd = () => {
-    const e = validate();
-    setErrors(e);
-    if (Object.keys(e).length) return;
 
-    if (!editUserId) {
-      // === THÊM MỚI ===
-      setUsers((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
+  // thêm
+  // thêm / sửa
+const saveAdd = async () => {
+  const errs = validate();       // chạy validate
+  setErrors(errs);               // đẩy lỗi ra form
+
+  if (Object.keys(errs).length > 0) return;  // có lỗi thì dừng
+
+  if (!editUserId) {
+    // === THÊM MỚI ===
+    try {
+      const res = await fetch("http://localhost:3000/api/creat-new-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
-          phone: form.phone,
-          role: form.role,
           password: form.password,
-        },
-      ]);
-    } else {
-      // === CẬP NHẬT (SỬA) ===
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editUserId
-            ? {
+          address: form.address,
+          phoneNumber: form.phone,
+          gender: form.gender,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Response từ server:", data);
+
+      if (data.errCode === 1) {
+        alert("Email đã tồn tại");
+        return;
+      }
+
+      if (data.errCode === 0) {
+        alert("Thêm thành công");
+
+        // cập nhật list trên FE
+        setUsers((prev) => [
+          ...prev,
+          data.user || {
+            id: Date.now(),
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            address: form.address,
+            phonenumber: form.phone,
+            gender: form.gender,
+            roleid: form.role,
+            password: form.password,
+          },
+        ]);
+
+        closeAdd();
+      }
+    } catch (err) {
+      console.error("Lỗi khi gọi API:", err);
+      alert("Thêm thất bại");
+    }
+  } else {
+    // === CẬP NHẬT (SỬA) ===
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === editUserId
+          ? {
               ...u,
               firstName: form.firstName,
               lastName: form.lastName,
               email: form.email,
-              phone: form.phone,
-              role: form.role,
-              // ✅ KHÔNG thay đổi password khi sửa
-              password: u.password,
+              address: form.address,
+              phonenumber: form.phone,
+              gender: form.gender,
+              roleid: form.role,
+              password: u.password, // giữ nguyên
             }
-            : u
-        )
-      );
-    }
-
+          : u
+      )
+    );
     closeAdd();
-  };
+  }
+};
+
 
   return (
     <div className="dash-page">
@@ -248,7 +294,6 @@ const Qluser = () => {
             </div>
           )}
         </div>
-
       </aside>
 
       {/* MAIN */}
@@ -262,8 +307,12 @@ const Qluser = () => {
             // ==== FORM ADD/EDIT ====
             <div className="dash-panel">
               <div className="dash-form-actions">
-                <button className="dash-btn dash-btn-primary" onClick={saveAdd}>Save</button>
-                <button className="dash-btn" onClick={closeAdd}>Return</button>
+                <button className="dash-btn dash-btn-primary" onClick={saveAdd}>
+                  Save
+                </button>
+                <button className="dash-btn" onClick={closeAdd}>
+                  Return
+                </button>
               </div>
 
               <div className="dash-addform">
@@ -276,7 +325,9 @@ const Qluser = () => {
                       value={form.firstName}
                       onChange={(e) => change("firstName", e.target.value)}
                     />
-                    {errors.firstName && <div className="dash-form-error">{errors.firstName}</div>}
+                    {errors.firstName && (
+                      <div className="dash-form-error">{errors.firstName}</div>
+                    )}
                   </div>
 
                   {/* Last Name* */}
@@ -287,7 +338,9 @@ const Qluser = () => {
                       value={form.lastName}
                       onChange={(e) => change("lastName", e.target.value)}
                     />
-                    {errors.lastName && <div className="dash-form-error">{errors.lastName}</div>}
+                    {errors.lastName && (
+                      <div className="dash-form-error">{errors.lastName}</div>
+                    )}
                   </div>
 
                   {/* Email* */}
@@ -299,8 +352,12 @@ const Qluser = () => {
                       value={form.email}
                       onChange={(e) => change("email", e.target.value)}
                     />
-                    {errors.email && <div className="dash-form-error">{errors.email}</div>}
+                    {errors.email && (
+                      <div className="dash-form-error">{errors.email}</div>
+                    )}
                   </div>
+
+                  {/* Password* chỉ khi thêm */}
                   {!editUserId && (
                     <>
                       <label className="dash-form-label">Password*</label>
@@ -311,10 +368,27 @@ const Qluser = () => {
                           value={form.password}
                           onChange={(e) => change("password", e.target.value)}
                         />
-                        {errors.password && <div className="dash-form-error">{errors.password}</div>}
+                        {errors.password && (
+                          <div className="dash-form-error">
+                            {errors.password}
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
+
+                  {/* Address */}
+                  <label className="dash-form-label">Address</label>
+                  <div>
+                    <input
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.address}
+                      onChange={(e) => change("address", e.target.value)}
+                    />
+                    {errors.address && (
+                      <div className="dash-form-error">{errors.address}</div>
+                    )}
+                  </div>
 
                   {/* Phone */}
                   <label className="dash-form-label">Phone</label>
@@ -324,6 +398,21 @@ const Qluser = () => {
                       value={form.phone}
                       onChange={(e) => change("phone", e.target.value)}
                     />
+                  </div>
+
+                  {/* Gender */}
+                  <label className="dash-form-label">Gender</label>
+                  <div>
+                    <select
+                      className="dash-select dash-select-lg dash-w100"
+                      value={form.gender}
+                      onChange={(e) => change("gender", e.target.value)}
+                    >
+                      <option value="">- None -</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
 
                   {/* User Type* */}
@@ -338,7 +427,9 @@ const Qluser = () => {
                       <option value={1}>Admin</option>
                       <option value={2}>Customer</option>
                     </select>
-                    {errors.role && <div className="dash-form-error">{errors.role}</div>}
+                    {errors.role && (
+                      <div className="dash-form-error">{errors.role}</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -362,11 +453,16 @@ const Qluser = () => {
                   <option value="firstName">First name</option>
                   <option value="lastName">Last name</option>
                   <option value="email">Email</option>
+                  <option value="address">Address</option>
                   <option value="phone">Phone</option>
                   <option value="role">User type</option>
                 </select>
-                <button className="dash-btn"><i className="fa fa-search" /> search</button>
-                <button className="dash-btn dash-btn-primary" onClick={openAdd}>+ Add</button>
+                <button className="dash-btn">
+                  <i className="fa fa-search" /> search
+                </button>
+                <button className="dash-btn dash-btn-primary" onClick={openAdd}>
+                  + Add
+                </button>
               </div>
 
               <div className="dash-table-card">
@@ -377,10 +473,12 @@ const Qluser = () => {
                       <th>First name</th>
                       <th>Last name</th>
                       <th>Email</th>
-                      <th>Password</th>
+                      <th>Address</th>
                       <th>Phone</th>
                       <th>User type</th>
-                      <th style={{ width: 100, textAlign: "right" }}>Actions</th>
+                      <th style={{ width: 100, textAlign: "right" }}>
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -389,10 +487,20 @@ const Qluser = () => {
                         <td>{idx + 1}.</td>
                         <td>{u.firstName}</td>
                         <td>{u.lastName}</td>
-                        <td><a className="dash-link" href={`mailto:${u.email}`}>{u.email}</a></td>
-                        <td>{u.password}</td>
+                        <td>
+                          <a className="dash-link" href={`mailto:${u.email}`}>
+                            {u.email}
+                          </a>
+                        </td>
+                        <td>{u.address}</td>
                         <td>{u.phonenumber}</td>
-                        <td>{u.roleid == 1 ? "Admin" : u.roleid == 2 ? "Customer" : "Unknown"}</td>
+                        <td>
+                          {u.roleid == 1
+                            ? "Admin"
+                            : u.roleid == 2
+                            ? "Customer"
+                            : "Unknown"}
+                        </td>
                         <td style={{ textAlign: "right" }}>
                           <button
                             className="dash-btn dash-btn-icon"
@@ -413,7 +521,10 @@ const Qluser = () => {
                     ))}
                     {filtered.length === 0 && (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: "center", color: "#6b7280" }}>
+                        <td
+                          colSpan={8}
+                          style={{ textAlign: "center", color: "#6b7280" }}
+                        >
                           No data
                         </td>
                       </tr>
