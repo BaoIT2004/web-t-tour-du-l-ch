@@ -1,5 +1,6 @@
 import express from "express";
 import homeController from "../controller/homeController";
+import userController from "../controller/userController";
 
 const router = express.Router();  // định nghĩa routerr riêng biệt cho một phần của ứng dụng 
 
@@ -12,8 +13,24 @@ const initWebRoutes = (app) => {
     router.post('/put-crud', homeController.putCRUD);
      router.get('/delete-crud', homeController.deleteCRUD);
 
+     //----------------- API -------------------------------------------
+    
+    router.post('/api/login', userController.handleLogin);  //1 - KH
+     
+    router.get('/api/getUser', userController.handleGetAllUser); //2 -  AM
+    
+    router.post('/api/creat-new-user', userController.handleSignup) //3 ; KH đăng kí tài khoản 
+
+    router.put('/api/edit-user', userController.handleEdituser) //4 ; Admin sửa tài khoản 
+
+    router.delete('/api/delete-user', userController.handleDeleteuser) //5 ; Admin sửa tài khoản 
+    router.get('/api/count', userController.handleCount)  // Dasboard đếm số người dùng
+   
+
     return app.use('/', router); // nexpress biết nạp route nào 
 }
 
 
 export default initWebRoutes;
+
+
