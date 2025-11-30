@@ -4,6 +4,7 @@ import { data } from "react-router-dom";
 
 
 
+
 /* ================== CONSTANTS ================== */
 
 const TABS = ["Flights", "Hotels", "Tours", "Cars"];
@@ -24,15 +25,15 @@ const HOTELS = [
     country: "United Arab Emirates",
     price: 200,
     rating: 5,
-    img: "",
+    img: "https://phptravels.net/uploads/184028-28-01-2023-1674874284.jpg",
   },
   {
-    title: "Four Points by Sheraton Bur Dubai",
+    title: "Four Points  Bur Dubai",
     city: "Dubai",
     country: "United Arab Emirates",
     price: 260,
     rating: 4,
-    img: "",
+    img: "https://phptravels.net/uploads/182171-28-01-2023-1674874525.jpg",
   },
   {
     title: "Armani Hotel Dubai",
@@ -40,16 +41,9 @@ const HOTELS = [
     country: "United Arab Emirates",
     price: 100,
     rating: 3,
-    img: "",
+    img: "https://phptravels.net/uploads/508456-29-01-2023-1675019630.jpg",
   },
-  {
-    title: "Hilton Dubai Creek",
-    city: "Dubai",
-    country: "United Arab Emirates",
-    price: 180,
-    rating: 4,
-    img: "",
-  },
+ 
 ];
 
 const TOURS = [
@@ -59,7 +53,7 @@ const TOURS = [
     country: "United Arab Emirates",
     price: 120,
     rating: 5,
-    img: "",
+    img: "https://phptravels.net/uploads/b8ylvzbv98o4gsocgo.jpg",
   },
   {
     title: "Halong Bay Cruise",
@@ -67,7 +61,7 @@ const TOURS = [
     country: "Vietnam",
     price: 200,
     rating: 4,
-    img: "",
+    img: "https://phptravels.net/uploads/25v2kngt4rj4c44gsg.jpg",
   },
   {
     title: "Bangkok City Tour",
@@ -75,15 +69,7 @@ const TOURS = [
     country: "Thailand",
     price: 150,
     rating: 4,
-    img: "",
-  },
-  {
-    title: "Singapore Night Safari",
-    city: "Singapore",
-    country: "Singapore",
-    price: 180,
-    rating: 5,
-    img: "",
+    img: "https://phptravels.net/uploads/1thwd9jdp9r4o4w0oc.jpg",
   },
 ];
 
@@ -163,6 +149,9 @@ function CustomerMenu() {
   }
 
     React.useEffect(() => {
+  };
+
+  React.useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       try {
@@ -203,6 +192,12 @@ function CustomerMenu() {
 
      <div className="hp-dd-menu" role="menu">
         {/* {!user && (
+        {/* Hiển thị email nếu có, nếu không thì "Customer" */}
+        {user ? `${user.email} ▾` : "Customer ▾"}
+      </button>
+
+      <div className="hp-dd-menu" role="menu">
+        {!user ? (
           <>
             <a className="hp-dd-item" href="/login" role="menuitem">
               Login
@@ -217,6 +212,10 @@ function CustomerMenu() {
           <>
             <span className="hp-dd-item">{user.email}</span>
             <button className="hp-dd-item" onClick={handleLogout}>
+=======
+        ) : (
+          <>
+            <button className="logout-btn" onClick={handleLogout}>
               Logout
             </button>
           </>
@@ -225,6 +224,7 @@ function CustomerMenu() {
     </div>
   )
 };
+
 
 /* -------- Hero + Tabs + Search -------- */
 function HeroSearch() {
@@ -733,37 +733,16 @@ function FeaturedFlights() {
 
 /* -------- Featured Hotels -------- */
 function FeaturedHotels() {
-  const [start, setStart] = React.useState(0);
-  const visible = 4;
-
-  const maxStart = Math.max(0, HOTELS.length - visible);
-  const next = () => setStart((s) => (s >= maxStart ? 0 : s + visible));
-  const prev = () => setStart((s) => (s <= 0 ? maxStart : s - visible));
-
-  const slice = HOTELS.slice(start, start + visible);
-  if (slice.length < visible) {
-    slice.push(...HOTELS.slice(0, visible - slice.length));
-  }
-
   return (
     <section className="hp-hotels">
       <div className="hp-container">
         <div className="hp-hotels-head">
-          <div>
-            <h2>Khách sạn nổi bật</h2>
-          </div>
-          <div className="hp-hotels-nav">
-            <button onClick={prev} aria-label="Previous">
-              ‹
-            </button>
-            <button onClick={next} aria-label="Next">
-              ›
-            </button>
-          </div>
+          <h2>Khách sạn nổi bật</h2>
         </div>
 
         <div className="hp-hotels-grid">
-          {slice.map((h, i) => (
+          {/* 3 khách sạn bên trái */}
+          {HOTELS.slice(0, 3).map((h, i) => (
             <article key={i} className="hp-hotel-card">
               <div className="hp-hotel-img">
                 {h.img ? (
@@ -781,53 +760,58 @@ function FeaturedHotels() {
                   <span className="rating">⭐ {h.rating}</span>
                 </div>
                 <h3 className="hp-hotel-title">{h.title}</h3>
-                <div className="hp-hotel-loc">
+                <div className="hp-hotel-loc"style={{ marginTop:"30px",marginBottom:"30px"}}>
                   <span className="city">{h.city}</span>{" "}
                   <span className="country">{h.country}</span>
                 </div>
               </div>
             </article>
           ))}
+
+          {/* Card XEM THÊM bên phải */}
+          <article className="hp-hotel-card hp-hotel-promo-card">
+              <div
+                className="hp-hotel-img"
+                style={{
+                  backgroundImage:
+                    "url('https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              ></div>
+
+              <div className="hp-hotel-meta promo-meta">
+                <h3 className="hp-hotel-title">Xem thêm nhiều khách sạn</h3>
+                <p className="promo-text">
+                  rất nhiều khách sạn đang chờ bạn
+                </p>
+
+                <a href="/hotels" className="hp-hotel-promo-btn"style={{ marginTop:"20px"}}>
+                  View More
+                </a>
+              </div>
+            </article>
+
         </div>
       </div>
     </section>
   );
 }
 
-/* -------- Popular Tours -------- */
+
+
+
+/* -------- Tour   -------- */
 function PopularTours() {
-  const [start, setStart] = React.useState(0);
-  const visible = 4;
-
-  const maxStart = Math.max(0, TOURS.length - visible);
-  const next = () => setStart((s) => (s >= maxStart ? 0 : s + visible));
-  const prev = () => setStart((s) => (s <= 0 ? maxStart : s - visible));
-
-  const slice = TOURS.slice(start, start + visible);
-  if (slice.length < visible) {
-    slice.push(...TOURS.slice(0, visible - slice.length));
-  }
-
   return (
     <section className="hp-tours">
       <div className="hp-container">
         <div className="hp-hotels-head">
-          <div>
-            <h2>Tour phổ biến</h2>
-          </div>
-
-          <div className="hp-hotels-nav">
-            <button onClick={prev} aria-label="Previous">
-              ‹
-            </button>
-            <button onClick={next} aria-label="Next">
-              ›
-            </button>
-          </div>
+          <h2>Tour phổ biến</h2>
         </div>
 
         <div className="hp-tours-grid">
-          {slice.map((t, i) => (
+          {TOURS.map((t, i) => (
             <article
               key={i}
               className="hp-tour-card"
@@ -850,11 +834,39 @@ function PopularTours() {
               </div>
             </article>
           ))}
+
+            <article
+              className="hp-tour-card"
+              style={{
+                backgroundImage:
+                  "url('https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg')",
+              }}
+            >
+              <div className="hp-tour-overlay">
+
+                <div className="hp-tour-info">
+                  <h3 className="hp-tour-title">Khám phá thêm tour</h3>
+                  <p className="hp-tour-price">Rất nhiều hành trình thú vị đang chờ bạn.</p>
+
+                  <hr />
+
+                  <div className="hp-tour-bottom">
+                    <div></div> {/* giữ bố cục giống card */}
+                    <a href="/tours" className="hp-tour-btn" style={{ padding: "6px 16px",marginRight: "60px" }}>
+                      Xem thêm →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+
         </div>
       </div>
     </section>
   );
 }
+  
+
 
 /* -------- Recommended Cars -------- */
 function RecommendedCars() {
