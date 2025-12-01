@@ -10,6 +10,7 @@ import Khachsanchitiet from "./dat-hotel.jsx";
 import Tour from "./dstour.jsx";
 import Tourchitiet from "./dat-tour.jsx";
 import XE from "./dsxe.jsx";
+import Hoadon from "./hoadon.jsx";
 import Login from "./login.jsx";
 import Signup from "./signup.jsx";
 import Thanhtoan from  "./thanhtoan.jsx"
@@ -18,6 +19,7 @@ import Qluser from"./dashboard-user.jsx";
 import Qltour from "./dashboard-tour.jsx";
 import Qldanhgia from "./dashboard-danhgia.jsx"
 import QlThanhtoan from "./dashboard-thanhtoan.jsx";
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode> 
@@ -33,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/tours" element={<Tour/>} />
         <Route path="/tourchitiet" element={<Tourchitiet />} />
         <Route path="/cars" element={<XE/>} />
+        <Route path="/bill" element={<Hoadon/>} />
         <Route path="/thanhtoan" element={<Thanhtoan/>} />
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/qluser" element={<Qluser/>} />
