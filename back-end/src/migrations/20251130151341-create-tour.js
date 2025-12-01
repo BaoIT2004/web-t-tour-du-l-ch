@@ -10,12 +10,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      adminid: {
-        type: Sequelize.STRING
-      },
-      customerid: {
-        type: Sequelize.STRING
-      },
       tourName: {
         type: Sequelize.STRING
       },

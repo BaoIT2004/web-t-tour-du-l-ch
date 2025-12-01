@@ -63,7 +63,6 @@ let handleDeleteuser = async (req, res) => {
 let handleEdituser = async (req, res) => {
     let data = req.body;
     console.log("BODY GỬI LÊN TỪ CLIENT:", req.body);
-
     let message = await userServices.updateUserData(data);
     return res.status(200).json(message)
 }

@@ -9,9 +9,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      tourId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'tour',   // bảng tour
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       itinerary: {
         type: Sequelize.STRING
-      },startDate: {
+      }, startDate: {
         type: Sequelize.DATE
       },
        endDate: {

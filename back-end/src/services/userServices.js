@@ -90,7 +90,7 @@ let handleGetAllUser = (userId) => {
             let users = '';
             if (!userId) {
                 return resolve([]);
-            } else if (userId === 'ALL') {
+            } else if (userId === 'ALL') { 
                 users = await db.User.findAll({
                     attributes: {
                         exclude: ['password']
@@ -111,6 +111,8 @@ let handleGetAllUser = (userId) => {
     })
 }
 
+
+// tạo
 let creatNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -144,6 +146,7 @@ let creatNewUser = (data) => {
     })
 }
 
+// xóa
 let deleteUser = (id) => {
     return new Promise(async (resolve, reject) => {
         let user = await db.User.findOne({  //https://www.youtube.com/watch?v=due4C4J53gs&t=4s  23:50
@@ -176,6 +179,8 @@ let countUser = async () => {
     }
 }
 
+
+//edit 
 let updateUserData = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
