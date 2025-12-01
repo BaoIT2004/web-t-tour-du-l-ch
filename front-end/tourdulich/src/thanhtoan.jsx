@@ -8,26 +8,16 @@ function SimpleHeader() {
 export default function PaymentPage() {
   const [payMethod, setPayMethod] = React.useState("qr");
 
-  // 👉 Lấy total (và people) từ URL: ?total=600000&people=2
+  // Lấy total (và people) từ URL: ?total=600000&people=2
   const searchParams = new URLSearchParams(window.location.search);
   const rawTotal = searchParams.get("total");
-  const rawPeople = searchParams.get("people");
-
   const total = rawTotal ? Number(rawTotal) : 0;
-  const people = rawPeople ? Number(rawPeople) : 0;
-
   const hasTotal = !Number.isNaN(total) && total > 0;
-
-  // Nếu chưa có total -> hiển thị "000.000", ngược lại format theo vi-VN
   const formattedTotal = hasTotal
     ? total.toLocaleString("vi-VN")
     : "000.000";
 
-  // Chỉ hiển thị (xxx / người) khi có total và people > 0
-  const pricePer =
-    hasTotal && people > 0
-      ? (total / people).toLocaleString("vi-VN")
-      : null;
+
 
   return (
     <div className="home-page">

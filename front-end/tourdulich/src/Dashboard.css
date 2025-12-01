@@ -586,11 +586,73 @@
   padding: 8px 12px;
 }
 
-/* (tuỳ chọn) Nếu muốn cả form chừa đều hai bên trong panel */
 .dash-addform{
-  padding: 16px 16px;           /* có thể đổi thành 16px 20px nếu muốn */
+  padding: 16px 16px;           
 }
 
+/*------------------------dashboard  ql đánh giá------------*/
+/* tiêu đề nhỏ trong header-row (Tours) */
+.dash-main-header-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* nút xóa / phản hồi trong bảng review */
+.dash-review-btn {
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dash-review-btn:hover {
+  background: #eef2ff;
+}
+
+.dash-review-btn-danger {
+  border-color: #fecaca;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dash-review-btn-danger:hover {
+  background: #fecaca;
+}
+.dash-btn-placeholder {
+  height: 36px;            /* cùng chiều cao nút */
+  width: 90px;             /* bằng width nút Xác nhận */
+  border-radius: 999px;
+  visibility: hidden;      /* ẩn nhưng vẫn chiếm diện tích */
+}
+/* Giữ layout cột ổn định */
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 14px;
+  table-layout: fixed;          /* 👈 quan trọng để width cột có tác dụng */
+}
+
+/* Cột State */
+.dash-col-state {
+  width: 150px;                 /* bạn tăng/giảm tùy ý */
+}
+
+/* Cột nút hành động */
+.dash-col-actions {
+  width: 120px;
+}
+
+/* Placeholder cho nút, giữ kích thước để không giật */
+.dash-btn-placeholder {
+  display: inline-block;
+  height: 36px;                 /* giống .dash-btn */
+  width: 90px;                  /* gần bằng nút "Xác nhận" */
+  border-radius: 999px;
+  visibility: hidden;           /* ẩn nhưng vẫn chiếm chỗ */
+}
 
 
 

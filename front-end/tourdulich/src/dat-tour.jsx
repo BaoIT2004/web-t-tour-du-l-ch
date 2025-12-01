@@ -101,7 +101,7 @@ function TourHero() {
     const [date, setDate] = React.useState("");
     const [people, setPeople] = React.useState(2);
     const basePrice = 300000; // giá / người
-    const totalPrice = basePrice * people;
+    const totalPrice = basePrice * people;  
   
     const formatVND = (value) =>
       value.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
