@@ -28,6 +28,14 @@ const INITIAL_PAYMENTS = [
   },
 ];
 
+const EMPTY_FORM = {
+  customer: "",
+  service: "",
+  cost: "",
+  date: "",
+  state: "",
+};
+
 export default function QlPayment() {
   const [payments, setPayments] = useState(INITIAL_PAYMENTS);
   const [query, setQuery] = useState("");
@@ -57,18 +65,100 @@ export default function QlPayment() {
     });
   }, [payments, query, field]);
 
-  // ===== HANDLE CONFIRM =====
-  const handleConfirm = (id) => {
-    setPayments((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, state: "Xác nhận" } : p
-      )
+  // ===== HANDLERS LIST =====
+  const handleDetail = (payment) => {
+    // tạm thời show alert, sau này bạn có thể đổi sang modal
+    alert(
+      `Chi tiết giao dịch:\n• Khách: ${payment.customer}\n• Dịch vụ: ${payment.service}\n• Giá: ${payment.cost}\n• Ngày: ${payment.date}\n• Trạng thái: ${payment.state}`
     );
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc muốn xoá giao dịch này?")) {
+      setPayments((prev) => prev.filter((p) => p.id !== id));
+    }
+  };
+
+  // ===== ADD / EDIT FORM =====
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
+  const [editPaymentId, setEditPaymentId] = useState(null); // null = thêm, khác null = sửa
+
+  const openEdit = (payment) => {
+    setEditPaymentId(payment.id);
+    setForm({
+      customer: payment.customer || "",
+      service: payment.service || "",
+      cost: payment.cost || "",
+      date: payment.date || "",
+      state: payment.state || "",
+    });
+    setErrors({});
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setErrors({});
+  };
+
+  const change = (name, value) => {
+    setForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const validate = () => {
+    const e = {};
+    if (!form.customer.trim()) e.customer = "Customer is required";
+    if (!form.service.trim()) e.service = "Service is required";
+    if (!form.cost.trim()) e.cost = "Cost is required";
+    if (!form.date.trim()) e.date = "Date is required";
+    if (!form.state.trim()) e.state = "State is required";
+    return e;
+  };
+
+  const saveForm = () => {
+    const e = validate();
+    setErrors(e);
+    if (Object.keys(e).length) return;
+
+    if (!editPaymentId) {
+      // nếu sau này bạn muốn có nút Add payment thì dùng nhánh này
+      setPayments((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          customer: form.customer,
+          service: form.service,
+          cost: form.cost,
+          date: form.date,
+          state: form.state,
+        },
+      ]);
+    } else {
+      // update
+      setPayments((prev) =>
+        prev.map((p) =>
+          p.id === editPaymentId
+            ? {
+                ...p,
+                customer: form.customer,
+                service: form.service,
+                cost: form.cost,
+                date: form.date,
+                state: form.state,
+              }
+            : p
+        )
+      );
+    }
+
+    closeForm();
   };
 
   return (
     <div className="dash-page">
-      {/* ========== SIDEBAR giống code dashboard cũ ========== */}
+      {/* ========== SIDEBAR ========== */}
       <aside className="dash-sidebar">
         <div className="dash-sidebar-header">
           <div className="dash-sidebar-title">Dashboard</div>
@@ -145,82 +235,197 @@ export default function QlPayment() {
       {/* ========== MAIN CONTENT ========== */}
       <main className="dash-main">
         <header className="dash-main-header">
-          {/* Giữ giống dashboard cũ, nếu muốn có thể đổi thành "Payments" */}
-          <h1>Tours</h1>
+          <h1>Transactions</h1>
         </header>
 
         <section className="dash-main-body">
-          <div className="dash-panel">
-            {/* ===== Toolbar ===== */}
-            <div className="dash-toolbar">
-              <input
-                className="dash-input"
-                placeholder="Search..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
+          {showForm ? (
+            /* ===== FORM EDIT PAYMENT (giống Qltour) ===== */
+            <div className="dash-panel">
+              <div className="dash-form-actions">
+                <button
+                  className="dash-btn dash-btn-primary"
+                  onClick={saveForm}
+                >
+                  Save
+                </button>
+                <button className="dash-btn" onClick={closeForm}>
+                  Return
+                </button>
+              </div>
 
-              <select
-                className="dash-select"
-                value={field}
-                onChange={(e) => setField(e.target.value)}
-              >
-                <option value="all">All fields</option>
-                <option value="customer">Name customer</option>
-                <option value="service">Name service</option>
-                <option value="cost">Cost</option>
-                <option value="state">State</option>
-              </select>
+              <div className="dash-addform">
+                <div className="dash-form-grid">
+                  {/* Customer */}
+                  <label className="dash-form-label">Name customer*</label>
+                  <div>
+                    <input
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.customer}
+                      onChange={(e) => change("customer", e.target.value)}
+                    />
+                    {errors.customer && (
+                      <div className="dash-form-error">{errors.customer}</div>
+                    )}
+                  </div>
 
-              <button className="dash-btn">
-                <i className="fa fa-search" /> search
-              </button>
+                  {/* Service */}
+                  <label className="dash-form-label">Name service*</label>
+                  <div>
+                    <input
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.service}
+                      onChange={(e) => change("service", e.target.value)}
+                    />
+                    {errors.service && (
+                      <div className="dash-form-error">{errors.service}</div>
+                    )}
+                  </div>
+
+                  {/* Cost */}
+                  <label className="dash-form-label">Cost*</label>
+                  <div>
+                    <input
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.cost}
+                      onChange={(e) => change("cost", e.target.value)}
+                      placeholder="500.000 vnd"
+                    />
+                    {errors.cost && (
+                      <div className="dash-form-error">{errors.cost}</div>
+                    )}
+                  </div>
+
+                  {/* Date */}
+                  <label className="dash-form-label">Date*</label>
+                  <div>
+                    <input
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.date}
+                      onChange={(e) => change("date", e.target.value)}
+                      placeholder="1/12/2025"
+                    />
+                    {errors.date && (
+                      <div className="dash-form-error">{errors.date}</div>
+                    )}
+                  </div>
+
+                  {/* State */}
+                  <label className="dash-form-label">State*</label>
+                  <div>
+                    <select
+                      className="dash-input dash-input-lg dash-w100"
+                      value={form.state}
+                      onChange={(e) => change("state", e.target.value)}
+                    >
+                      <option value="">-- chọn trạng thái --</option>
+                      <option value="Xác nhận">Xác nhận</option>
+                      <option value="Chưa xác nhận">Chưa xác nhận</option>
+                    </select>
+                    {errors.state && (
+                      <div className="dash-form-error">{errors.state}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
+          ) : (
+            /* ===== LIST TABLE ===== */
+            <div className="dash-panel">
+              {/* Toolbar search */}
+              <div className="dash-toolbar">
+                <input
+                  className="dash-input"
+                  placeholder="Search..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
 
-            {/* ===== TABLE ===== */}
-            <div className="dash-table-wrap">
-              <table className="dash-table">
-              <thead>
-                <tr>
-                    <th className="dash-col-center">#</th>
-                    <th>Name customer</th>
-                    <th>Name service</th>
-                    <th>Cost</th>
-                    <th>Date</th>
-                    <th className="dash-col-state">State</th>        {/* 👈 */}
-                    <th className="dash-col-center dash-col-actions"></th> {/* 👈 */}
-                </tr>
-                </thead>
+                <select
+                  className="dash-select"
+                  value={field}
+                  onChange={(e) => setField(e.target.value)}
+                >
+                  <option value="all">All fields</option>
+                  <option value="customer">Name customer</option>
+                  <option value="service">Name service</option>
+                  <option value="cost">Cost</option>
+                  <option value="state">State</option>
+                </select>
 
-                <tbody>
-                {filtered.map((p, idx) => (
-                    <tr key={p.id}>
-                    <td className="dash-col-center">{idx + 1}.</td>
-                    <td>{p.customer}</td>
-                    <td>{p.service}</td>
-                    <td>{p.cost}</td>
-                    <td>{p.date}</td>
-                    <td className="dash-col-state">{p.state}</td>  {/* 👈 */}
-                    <td className="dash-col-center dash-col-actions">
-                        {p.state === "Chưa xác nhận" ? (
-                        <button
-                            className="dash-btn dash-btn-primary"
-                            style={{ borderRadius: "999px" }}
-                            onClick={() => handleConfirm(p.id)}
-                        >
-                            Xác nhận
-                        </button>
-                        ) : (
-                        <div className="dash-btn-placeholder" />
-                        )}
-                    </td>
+                <button className="dash-btn">
+                  <i className="fa fa-search" /> search
+                </button>
+              </div>
+
+              {/* Table */}
+              <div className="dash-table-wrap">
+                <table className="dash-table">
+                  <thead>
+                    <tr>
+                      <th className="dash-col-center">#</th>
+                      <th>Name customer</th>
+                      <th>Name service</th>
+                      <th>Cost</th>
+                      <th>Date</th>
+                      <th className="dash-col-state">State</th>
+                      <th className="dash-col-center dash-col-actions">
+                        Actions
+                      </th>
                     </tr>
-                ))}
-                </tbody>
+                  </thead>
 
-              </table>
+                  <tbody>
+                    {filtered.map((p, idx) => (
+                      <tr key={p.id}>
+                        <td className="dash-col-center">{idx + 1}.</td>
+                        <td>{p.customer}</td>
+                        <td>{p.service}</td>
+                        <td>{p.cost}</td>
+                        <td>{p.date}</td>
+                        <td className="dash-col-state">{p.state}</td>
+                        <td className="dash-col-center dash-col-actions">
+                          {/* Chi tiết */}
+                          <button
+                            className="dash-btn dash-btn-secondary"
+                            onClick={() => handleDetail(p)}
+                          >
+                            <i className="fa-solid fa-circle-info" /> Chi tiết
+                          </button>
+
+                          {/* Sửa -> mở form giống Qltour */}
+                          <button
+                            className="dash-btn dash-btn-secondary"
+                            onClick={() => openEdit(p)}
+                          >
+                            <i className="fa-regular fa-pen-to-square" />
+                          </button>
+
+                          {/* Xoá */}
+                          <button
+                            className="dash-btn dash-btn-danger"
+                            onClick={() => handleDelete(p.id)}
+                          >
+                            <i className="fa-regular fa-trash-can" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          style={{ textAlign: "center", color: "#6b7280" }}
+                        >
+                          No data
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </section>
       </main>
     </div>

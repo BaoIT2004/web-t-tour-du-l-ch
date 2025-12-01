@@ -654,6 +654,56 @@
   visibility: hidden;           /* ẩn nhưng vẫn chiếm chỗ */
 }
 
+/* ========================= */
+/*   PAYMENTS – ACTION BTNS  */
+/* ========================= */
+
+/* Ô chứa 3 nút (td có class dash-col-actions) */
+.dash-col-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;              /* khoảng cách giữa các nút */
+  padding: 8px 4px;
+  min-width: 180px;      /* đủ chỗ cho 3 nút */
+}
+
+/* Nút chung */
+.dash-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;   /* không xuống dòng */
+  background: #e5e7eb;
+  color: #111827;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Nút Chi tiết + Sửa */
+.dash-btn-secondary {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.dash-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+/* Nút Xoá */
+.dash-btn-danger {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.dash-btn-danger:hover {
+  background: #fecaca;
+}
+
+
 
 
 
