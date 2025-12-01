@@ -231,25 +231,32 @@ input[type="password"]:focus {
   --hp-line: #e6e8ee;
   --hp-shadow: 0 10px 28px rgba(15,17,21,.22);
   --hp-primary: #1666f0;
+  background-color: #eef4fb;
 }
 
 .home-page .hp-container{max-width:1100px; margin:0 auto; padding:0 16px}
 
 /* Thanh topbar cố định */
 .hp-topbar {
-  position: fixed;           /* cố định ở đầu trang */
-  top: 0;                    /* dính sát mép trên */
+  position: fixed;
+  /* cố định ở đầu trang */
+  top: 0;
+  /* dính sát mép trên */
   left: 0;
-  width: 100%;               /* kéo hết chiều ngang */
-  z-index: 1000;             /* nằm trên cùng */
-  background: #ffffff;       /* hoặc màu gradient bạn muốn */
+  width: 100%;
+  /* kéo hết chiều ngang */
+  z-index: 1000;
+  /* nằm trên cùng */
+  background: #ffffff;
+  /* hoặc màu gradient bạn muốn */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid #c2c7d1;
+  box-shadow: 0 13px 15px rgba(0, 0, 0, 0.08);
 }
 
 .home-page .hp-brand{display:flex; align-items:center; gap:10px; font-weight:700;color: black;font-family: "Times New Roman", serif;}
@@ -1639,16 +1646,16 @@ input[type="password"]:focus {
   align-items: center;        /* căn giữa theo chiều dọc */
   justify-content: center;     /* giúp a thành nút */
   text-decoration: none;      /* bỏ gạch chân */
-  color: #111827;             /* chữ đen mặc định */
+  color: #111827; 
   justify-self: end;
   padding: 6px 16px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1px solid #9ca3af;
   background: #f9fafb;
   font-size: 13px;
-  cursor: pointer;
-  transition: 0.2s;
-}
+  cursor: pointer;   
+}         
+
 
 .ht-btn-outline:hover {
   background: #2563eb;
@@ -1834,16 +1841,7 @@ input[type="password"]:focus {
   color: #111827;
 }
 
-/* nút Đặt ngay */
-.ht-btn-outline {
-  justify-self: end;
-  padding: 6px 16px;
-  border-radius: 999px;
-  border: 1px solid #9ca3af;
-  background: #f9fafb;
-  font-size: 13px;
-  cursor: pointer;
-}
+
 
 .ht-btn-outline:hover {
   background: #2563eb;
@@ -2188,7 +2186,7 @@ input[type="password"]:focus {
 
 /* form bên phải */
 .tt-hero-form {
-  background: #f9fafb;
+  background: #212529;
   border-radius: 4px;
   border: 1px solid #d1d5db;
   padding: 14px 12px;
@@ -2196,26 +2194,31 @@ input[type="password"]:focus {
   flex-direction: column;
   gap: 8px;
   font-size: 13px;
-  color: #111827;
+  color: #f9fafb;;
 }
 
 .tt-form-group {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* giúp label và input tách đều 2 bên */
+  margin-bottom: 12px;
 }
 
 .tt-form-group label {
   font-weight: 500;
+  width: 150px;              /* cố định width để các dòng thẳng nhau */
+  display: block;
 }
 
 .tt-input,
 .tt-select {
-  height: 30px;
+  flex: 1;                   /* ô nhập sẽ tự giãn đều */
+  height: 32px;
   padding: 4px 8px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid #cbd5e1;
-  font-size: 13px;
+  font-size: 14px;
   outline: none;
 }
 
@@ -2225,19 +2228,35 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
+/* === DÒNG HIỂN THỊ GIÁ TOUR === */
+.tt-price-row {
+  margin-bottom: 16px !important;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #374151;
+}
+
+.tt-price-text {
+  flex: 1;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  color: #98a0c5;
+}
+
+
 /* ô giá */
 .tt-price-box {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   font-weight: 600;
-  color: #111827;
+  color: #ffffff;
 }
 
 .tt-price-box small {
   font-weight: 400;
   font-size: 12px;
-  color: #6b7280;
+  color: #a5abb8;
 }
 
 /* nút đặt ngay */
@@ -2794,5 +2813,42 @@ input[type="password"]:focus {
   background: #e5e7eb;
   margin-top: 16px;
   border: 1px solid #d1d5db;
+}
+
+
+/* Quản lí tour ( lịch trình ) */
+
+/* Định dạng đồng nhất cho tất cả input/select/textarea trong .day-item */
+.day-item .dash-input,
+.day-item textarea,
+.day-item select {
+  width: 100%;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* textarea cùng style với input */
+.day-item textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Nội dung block lịch trình */
+.day-item {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+/* Đồng nhất icon date, select */
+.day-item input[type="date"],
+.day-item select {
+  height: 48px;
+  padding: 8px 12px;
 }
 

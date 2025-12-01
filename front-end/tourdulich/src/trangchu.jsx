@@ -1,8 +1,7 @@
-import React from "react";
-import "./app.css"; // dùng chung css tổng
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
-
-
+import "./app.css";
 
 /* ================== CONSTANTS ================== */
 
@@ -42,34 +41,6 @@ const HOTELS = [
     rating: 3,
     img: "https://phptravels.net/uploads/508456-29-01-2023-1675019630.jpg",
   },
- 
-];
-
-const TOURS = [
-  {
-    title: "Desert Safari Adventure",
-    city: "Dubai",
-    country: "United Arab Emirates",
-    price: 120,
-    rating: 5,
-    img: "https://phptravels.net/uploads/b8ylvzbv98o4gsocgo.jpg",
-  },
-  {
-    title: "Halong Bay Cruise",
-    city: "Ha Long",
-    country: "Vietnam",
-    price: 200,
-    rating: 4,
-    img: "https://phptravels.net/uploads/25v2kngt4rj4c44gsg.jpg",
-  },
-  {
-    title: "Bangkok City Tour",
-    city: "Bangkok",
-    country: "Thailand",
-    price: 150,
-    rating: 4,
-    img: "https://phptravels.net/uploads/1thwd9jdp9r4o4w0oc.jpg",
-  },
 ];
 
 const TRANSFER_CARS = [
@@ -101,7 +72,6 @@ function Header() {
   return (
     <header className="hp-topbar">
       <div className="hp-brand">
-        {/* Click logo / BTQQ Travel → luôn về trang chủ và reload */}
         <a
           href="/home"
           style={{
@@ -119,12 +89,11 @@ function Header() {
       </div>
 
       <nav className="hp-nav">
-        {/* Mỗi click ở đây đều chuyển trang + load lại từ đầu */}
         <a href="/flights">Flights</a>
         <a href="/hotels">Hotels</a>
         <a href="/tours">Tours</a>
         <a href="/cars">Cars</a>
-        <a href="/blogs">Blogs</a> {/* hoặc "#" nếu chưa có trang blogs */}
+        <a href="/blogs">Blogs</a>
       </nav>
 
       <div>
@@ -135,6 +104,7 @@ function Header() {
 }
 
 /* -------- Dropdown Customer -------- */
+
 function CustomerMenu() {
   const [open, setOpen] = React.useState(false);
   const [user, setUser] = React.useState(null);
@@ -143,16 +113,19 @@ function CustomerMenu() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/login"; 
+    window.location.href = "/login";
   };
 
+  // LẤY USER TỪ LOCALSTORAGE
   React.useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
+    const saved = localStorage.getItem("user");
+    if (saved) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
       } catch (e) {
-        console.error("Lỗi parse user từ localStorage", e);
+        console.log("Parse user failed:", e);
+        setUser(null);
       }
     }
   }, []);
@@ -180,8 +153,7 @@ function CustomerMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        {/* Hiển thị email nếu có, nếu không thì "Customer" */}
-        {user ? `${user.email} ▾` : "Customer ▾"}
+        {user && user.email ? `${user.email} ▾` : "Customer ▾"}
       </button>
 
       <div className="hp-dd-menu" role="menu">
@@ -206,12 +178,12 @@ function CustomerMenu() {
   );
 }
 
-
 /* -------- Hero + Tabs + Search -------- */
+
 function HeroSearch() {
   const [activeTab, setActiveTab] = React.useState("Flights");
 
-  /* ========== STATE CHO FLIGHTS (giữ mẫu cũ) ========== */
+  /* ========== STATE CHO FLIGHTS ========== */
   const [tripType, setTripType] = React.useState("oneway");
   const [cabin, setCabin] = React.useState("economy");
   const [from, setFrom] = React.useState("");
@@ -311,7 +283,6 @@ function HeroSearch() {
     };
   }, []);
 
-  /* ========== HÀM ĐỔI SỐ LƯỢNG HOTEL ========== */
   const changeHotelGuest = (type, delta) => {
     if (type === "rooms") {
       setHotelRooms((v) => Math.max(1, v + delta));
@@ -329,7 +300,6 @@ function HeroSearch() {
           lifetime of memories.
         </p>
 
-        {/* Tabs */}
         <div className="hp-tabs">
           {TABS.map((t) => (
             <button
@@ -423,7 +393,6 @@ function HeroSearch() {
           {/* =============== HOTELS =============== */}
           {activeTab === "Hotels" && (
             <div className="hp-grid-hotels">
-              {/* Location */}
               <label className="hp-hotel-field hp-hotel-loc">
                 <input
                   className="hp-hotel-input"
@@ -433,7 +402,6 @@ function HeroSearch() {
                 />
               </label>
 
-              {/* Checkin */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
                   <span className="hp-hotel-label">Checkin</span>
@@ -446,7 +414,6 @@ function HeroSearch() {
                 </div>
               </label>
 
-              {/* Checkout */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
                   <span className="hp-hotel-label">Checkout</span>
@@ -459,7 +426,6 @@ function HeroSearch() {
                 </div>
               </label>
 
-              {/* Travellers & Rooms */}
               <label
                 ref={hotelGuestsRef}
                 className="hp-hotel-field hp-hotel-people"
@@ -479,7 +445,6 @@ function HeroSearch() {
                     className="hp-guests-popover"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Rooms */}
                     <div className="hp-guest-row">
                       <span className="hp-guest-label">Rooms</span>
                       <div className="hp-guest-counter">
@@ -497,7 +462,6 @@ function HeroSearch() {
                       </div>
                     </div>
 
-                    {/* Travellers */}
                     <div className="hp-guest-row">
                       <span className="hp-guest-label">Travellers</span>
                       <div className="hp-guest-counter">
@@ -529,7 +493,6 @@ function HeroSearch() {
           {/* =============== TOURS =============== */}
           {activeTab === "Tours" && (
             <div className="hp-grid-tours">
-              {/* City */}
               <label className="hp-hotel-field hp-tour-city">
                 <input
                   className="hp-hotel-input"
@@ -539,7 +502,6 @@ function HeroSearch() {
                 />
               </label>
 
-              {/* Date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
                   <span className="hp-hotel-label">Date</span>
@@ -552,7 +514,6 @@ function HeroSearch() {
                 </div>
               </label>
 
-              {/* Travellers */}
               <label
                 ref={tourGuestsRef}
                 className="hp-hotel-field hp-tour-people"
@@ -599,7 +560,6 @@ function HeroSearch() {
           {/* =============== CARS =============== */}
           {activeTab === "Cars" && (
             <div className="hp-grid-cars">
-              {/* City */}
               <label className="hp-hotel-field">
                 <input
                   className="hp-hotel-input"
@@ -609,7 +569,6 @@ function HeroSearch() {
                 />
               </label>
 
-              {/* Pick up date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
                   <span className="hp-hotel-label">Pick up date</span>
@@ -622,7 +581,6 @@ function HeroSearch() {
                 </div>
               </label>
 
-              {/* Drop off date */}
               <label className="hp-hotel-field">
                 <div className="hp-hotel-text">
                   <span className="hp-hotel-label">Drop off date</span>
@@ -635,7 +593,6 @@ function HeroSearch() {
                 </div>
               </label>
 
-              {/* Travellers */}
               <label
                 ref={carGuestsRef}
                 className="hp-hotel-field hp-tour-people"
@@ -684,10 +641,8 @@ function HeroSearch() {
   );
 }
 
-
-
-
 /* -------- Featured Flights -------- */
+
 function FeaturedFlights() {
   return (
     <section className="hp-featured">
@@ -713,6 +668,7 @@ function FeaturedFlights() {
 }
 
 /* -------- Featured Hotels -------- */
+
 function FeaturedHotels() {
   return (
     <section className="hp-hotels">
@@ -722,7 +678,6 @@ function FeaturedHotels() {
         </div>
 
         <div className="hp-hotels-grid">
-          {/* 3 khách sạn bên trái */}
           {HOTELS.slice(0, 3).map((h, i) => (
             <article key={i} className="hp-hotel-card">
               <div className="hp-hotel-img">
@@ -741,7 +696,10 @@ function FeaturedHotels() {
                   <span className="rating">⭐ {h.rating}</span>
                 </div>
                 <h3 className="hp-hotel-title">{h.title}</h3>
-                <div className="hp-hotel-loc"style={{ marginTop:"30px",marginBottom:"30px"}}>
+                <div
+                  className="hp-hotel-loc"
+                  style={{ marginTop: "30px", marginBottom: "30px" }}
+                >
                   <span className="city">{h.city}</span>{" "}
                   <span className="country">{h.country}</span>
                 </div>
@@ -749,41 +707,55 @@ function FeaturedHotels() {
             </article>
           ))}
 
-          {/* Card XEM THÊM bên phải */}
           <article className="hp-hotel-card hp-hotel-promo-card">
-              <div
-                className="hp-hotel-img"
-                style={{
-                  backgroundImage:
-                    "url('https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg')",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              ></div>
+            <div
+              className="hp-hotel-img"
+              style={{
+                backgroundImage:
+                  "url('https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            ></div>
 
-              <div className="hp-hotel-meta promo-meta">
-                <h3 className="hp-hotel-title">Xem thêm nhiều khách sạn</h3>
-                <p className="promo-text">
-                  rất nhiều khách sạn đang chờ bạn
-                </p>
+            <div className="hp-hotel-meta promo-meta">
+              <h3 className="hp-hotel-title">Xem thêm nhiều khách sạn</h3>
+              <p className="promo-text">
+                rất nhiều khách sạn đang chờ bạn
+              </p>
 
-                <a href="/hotels" className="hp-hotel-promo-btn"style={{ marginTop:"20px"}}>
-                  View More
-                </a>
-              </div>
-            </article>
-
+              <a
+                href="/hotels"
+                className="hp-hotel-promo-btn"
+                style={{ marginTop: "20px" }}
+              >
+                View More
+              </a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
   );
 }
+/* -------- Popular Tours (dùng dữ liệu từ backend) -------- */
 
-
-
-
-/* -------- Tour   -------- */
 function PopularTours() {
+  const navigate = useNavigate(); 
+  const [tours, setTours] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch("http://localhost:3000/api/view-new-tour")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("DỮ LIỆU TOUR TỪ BACKEND:", data);
+        setTours(Array.isArray(data.tours) ? data.tours : []);
+      })
+      .catch((err) => console.log("Lỗi fetch tours:", err));
+  }, []);
+
+  const firstTour = tours[0]; // dùng cho card "Khám phá thêm tour"
+
   return (
     <section className="hp-tours">
       <div className="hp-container">
@@ -792,64 +764,82 @@ function PopularTours() {
         </div>
 
         <div className="hp-tours-grid">
-          {TOURS.map((t, i) => (
+          {/* CÁC TOUR TỪ BACKEND */}
+          {tours.map((tour, i) => (
             <article
-              key={i}
+              key={tour.id || i}
               className="hp-tour-card"
-              style={{ backgroundImage: `url(${t.img || ""})` }}
+              style={{
+                backgroundImage: tour.image
+                  ? `url("http://localhost:3000${tour.image}")`
+                  : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
             >
               <div className="hp-tour-overlay">
-                <div className="hp-tour-city">{t.city}</div>
-
                 <div className="hp-tour-info">
-                  <h3 className="hp-tour-title">{t.title}</h3>
-                  <p className="hp-tour-price">USD {t.price.toFixed(2)}</p>
+                  <h3 className="hp-tour-title">{tour.tourName}</h3>
+                  <p className="hp-tour-price">
+                    VND {Number(tour.tourPrice || 0).toFixed(2)}
+                  </p>
                   <hr />
                   <div className="hp-tour-bottom">
-                    <div className="hp-tour-rating">
-                      {"⭐".repeat(t.rating)}
-                    </div>
-                    <button className="hp-tour-btn">Chi tiết →</button>
+                    <div className="hp-tour-rating">⭐⭐⭐⭐⭐</div>
+                    <button
+                      className="hp-tour-btn"
+                      onClick={() => navigate(`/dattour/${tour.id}`)}
+                    >
+                      Chi tiết →
+                    </button>
                   </div>
                 </div>
               </div>
             </article>
           ))}
 
-            <article
-              className="hp-tour-card"
-              style={{
-                backgroundImage:
-                  "url('https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg')",
-              }}
-            >
-              <div className="hp-tour-overlay">
+          {/* CARD KHÁM PHÁ THÊM TOUR */}
+          <article
+            className="hp-tour-card"
+            style={{
+              backgroundImage: firstTour?.image
+                ? `url("http://localhost:3000${firstTour.image}")`
+                : 'url("https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg")',
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="hp-tour-overlay">
+              <div className="hp-tour-info">
+                <h3 className="hp-tour-title">Khám phá thêm tour</h3>
+                <p className="hp-tour-price">
+                  Rất nhiều hành trình thú vị đang chờ bạn.
+                </p>
 
-                <div className="hp-tour-info">
-                  <h3 className="hp-tour-title">Khám phá thêm tour</h3>
-                  <p className="hp-tour-price">Rất nhiều hành trình thú vị đang chờ bạn.</p>
+                <hr />
 
-                  <hr />
-
-                  <div className="hp-tour-bottom">
-                    <div></div> {/* giữ bố cục giống card */}
-                    <a href="/tours" className="hp-tour-btn" style={{ padding: "6px 16px",marginRight: "60px" }}>
-                      Xem thêm →
-                    </a>
-                  </div>
+                <div className="hp-tour-bottom">
+                  <div></div>
+                  <a
+                    href="/tours"
+                    className="hp-tour-btn"
+                    style={{ padding: "6px 16px", marginRight: "60px" }}
+                  >
+                    Xem thêm →
+                  </a>
                 </div>
               </div>
-            </article>
-
+            </div>
+          </article>
         </div>
       </div>
     </section>
   );
 }
-  
 
 
 /* -------- Recommended Cars -------- */
+
 function RecommendedCars() {
   return (
     <section className="hp-cars">
@@ -857,7 +847,6 @@ function RecommendedCars() {
         <h2>Xe trung chuyển được đề xuất</h2>
 
         <div className="hp-cars-grid">
-          {/* Promo tile bên trái */}
           <article className="hp-cars-promo">
             <div
               className="hp-cars-promo-img"
@@ -874,7 +863,6 @@ function RecommendedCars() {
             </div>
           </article>
 
-          {/* Các xe gợi ý */}
           {TRANSFER_CARS.map((car, i) => (
             <article key={i} className="hp-car-card">
               <div className="hp-car-img">
@@ -903,6 +891,7 @@ function RecommendedCars() {
 }
 
 /* -------- Footer -------- */
+
 function Footer() {
   return (
     <footer className="hp-footer">

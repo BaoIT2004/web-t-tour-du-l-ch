@@ -44,6 +44,18 @@ function CustomerMenu() {
   const ref = React.useRef(null);
 
   React.useEffect(() => {
+
+    fetch("http://localhost:3000/api/view-new-tour")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("DỮ LIỆU TOUR TỪ BACKEND:", data);
+        setTours(Array.isArray(data.tours) ? data.tours : []);
+      })
+      .catch((err) => console.log("Lỗi fetch tours:", err));
+
+
+
+      
     const onDoc = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
@@ -98,74 +110,93 @@ const REVIEW_LIST = [
 /* ============ COMPONENT 1: HERO TOUR ============ */
 
 function TourHero() {
-    const [date, setDate] = React.useState("");
-    const [people, setPeople] = React.useState(2);
-    const basePrice = 300000; // giá / người
-    const totalPrice = basePrice * people;  
-  
-    const formatVND = (value) =>
-      value.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
-  
-    return (
-      <section className="tt-main">
-        <div className="hp-container">
-          <div className="tt-hero-box">
-            <div className="tt-hero-grid">
-              {/* Ảnh lớn bên trái */}
-              <div className="tt-hero-image">
-                <img src="" />
+  const [date, setDate] = React.useState("");
+  const [adult, setAdult] = React.useState("");   // người lớn
+  const [child, setChild] = React.useState("");
+  const basePrice = 300000; // giá / người lớn 
+  const childPrice = basePrice * 50 / 100;
+  const totalPrice = adult * basePrice + child * childPrice;;
+
+  const formatVND = (value) =>
+    value.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
+
+  return (
+    <section className="tt-main">
+      <div className="hp-container">
+        <div className="tt-hero-box">
+          <div className="tt-hero-grid">
+            {/* Ảnh bên trái */}
+            <div className="tt-hero-image">
+              <img src="" alt="Tour" />
+            </div>
+
+            {/* FORM + GIÁ TOUR BÊN PHẢI (CHỈ 1 .tt-hero-form) */}
+            <div className="tt-hero-form">
+              {/* dòng giá tour */}
+              <div className="tt-form-group tt-price-row">
+                <label>Giá tour</label>
+                <div className="tt-price-text">
+                  {formatVND(basePrice)} VND / người
+                </div>
               </div>
-  
-              {/* Form bên phải */}
-              <div className="tt-hero-form">
-                <div className="tt-form-group">
-                  <label>Ngày đi</label>
-                  <input
-                    type="date"
-                    className="tt-input"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                  />
-                </div>
-  
-                <div className="tt-form-group">
-                  <label>Số người</label>
-                  <select
-                    className="tt-select"
-                    value={people}
-                    onChange={(e) => setPeople(Number(e.target.value))}
-                  >
-                    <option value={1}>1 người</option>
-                    <option value={2}>2 người</option>
-                    <option value={3}>3 người</option>
-                    <option value={4}>4 người</option>
-                    <option value={5}>5 người</option>
-                  </select>
-                </div>
-  
-                <div className="tt-form-group">
-                  <label>Tổng cộng</label>
-                  <div className="tt-price-box">
-                    <span>{formatVND(totalPrice)} VND</span>
-                    <small>({formatVND(basePrice)} / người)</small>
-                  </div>
-                </div>
-  
-                {/* ⬇⬇⬇ CHỈ SỬA DÒNG NÀY */}
-                <a
-                  href={`/thanhtoan?total=${totalPrice}&people=${people}`}
-                  className="ht-btn-outline"
-                >
-                  Đặt ngay
-                </a>
+
+              <div className="tt-form-group">
+                <label>Ngày đi</label>
+                <input
+                  type="date"
+                  className="tt-input"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
               </div>
+
+              <div className="tt-form-group">
+                <label>Người lớn ▸ Age 12+</label>
+                <input
+                  type="number"
+                  className="tt-select"
+                  value={adult}
+                  onChange={(e) => setAdult(Number(e.target.value))}
+                  placeholder="Nhập số người"
+                />
+
+              </div>
+
+              <div className="tt-form-group">
+                <label>Trẻ em ▸ Age 12-</label>
+                <input
+                  type="number"
+                  className="tt-select"
+                  value={child}
+                  onChange={(e) => setChild(Number(e.target.value))}
+                  placeholder="Nhập số người"
+                />
+
+              </div>
+
+              <div className="tt-form-group">
+                <label>Tổng cộng</label>
+                <div className="tt-price-box">
+                  <span>{formatVND(totalPrice)} VND</span>
+                  <small>({formatVND(basePrice)} / người)</small>
+                </div>
+              </div>
+
+              <a
+                href={`/thanhtoan?total=${totalPrice}&people=${adult + child}`}
+                className="ht-btn-outline"
+              >
+                Đặt ngay
+              </a>
             </div>
           </div>
         </div>
-      </section>
-    );
-  }
-  
+      </div>
+    </section>
+
+  );
+}
+
 
 /* ============ COMPONENT 2: TIẾN TRÌNH TOUR ============ */
 
