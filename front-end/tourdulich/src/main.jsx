@@ -32,7 +32,6 @@
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/qluser" element={<Qluser/>} />
           <Route path="/qltour" element={<Qltour/>} />
-          <Route path="/qltour" element={<Qltour/>} />
         </Routes>
       </BrowserRouter>
     </React.StrictMode>

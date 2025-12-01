@@ -60,7 +60,6 @@ const Dashboard = () => {
             <i className="fa-regular fa-user" />
             Users
           </button>
-
           <button className="dash-menu-item" >
             <i className="fa-regular fa-calendar-check" />
             Bookings
@@ -73,7 +72,7 @@ const Dashboard = () => {
             <i className="fa-solid fa-hotel" />
             Hotels
           </button>
-          <button className="dash-menu-item">
+          <button className="dash-menu-item" onClick={() => navigate("/qltour")}>
             <i className="fa-solid fa-route" />
             Tours
           </button>
@@ -110,7 +109,7 @@ const Dashboard = () => {
           {/* Menu xổ ra */}
           {isUserMenuOpen && (
             <div className="dash-user-menu">
-              <button className="dash-user-menu-item">Dashboard</button>
+              <button className="dash-user-menu-item"></button>
               <button className="dash-user-menu-item">Settings</button>
               <button className="dash-user-menu-item">Profile</button>
               <div className="dash-user-menu-divider" />
