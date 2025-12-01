@@ -274,9 +274,8 @@ const Qltour = () => {
                       className="dash-input dash-input-lg dash-w100"
                       value={form.img}
                       onChange={(e) => change("img", e.target.value)}
-                      placeholder="https://..."
+                      placeholder=""
                     />
-                    <div className="dash-form-hint">Để trống nếu chưa có ảnh, sẽ hiện icon placeholder.</div>
                   </div>
                 </div>
               </div>
