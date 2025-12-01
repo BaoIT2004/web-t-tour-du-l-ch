@@ -2639,6 +2639,12 @@ input[type="password"]:focus {
   font-weight: 700;
   color: #111827;
 }
+.error-text {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+  display: block;
+}
 
 /* điều khoản + nút thanh toán */
 .pay-agree-row {
@@ -2695,6 +2701,97 @@ input[type="password"]:focus {
   color: #111;
   border-bottom: 1px solid #d1d5db;
 }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.modal-section {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.modal-label {
+  font-weight: 600;
+  color: #222222;
+}
+
+.modal-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-confirm-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #1e88e5;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.modal-confirm-btn:hover {
+  opacity: 0.9;
+}
+/* Tất cả chữ trong popup hóa đơn màu đen */
+.modal,
+.modal * {
+  color: #000 !important;
+}
+
+/* Giữ màu trắng của nút xác nhận như cũ */
+.modal-confirm-btn,
+.modal-confirm-btn * {
+  color: #fff !important;
+}
+.pay-success {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #e6ffed;
+  border: 1px solid #b7eb8f;
+  color: #137333;
+  font-weight: 500;
+}
+.pay-success-popup {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e6ffed;
+  border: 1px solid #b7eb8f;
+  color: #137333;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+
 
 /*-------đặt tour------------*/
 
