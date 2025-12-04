@@ -25,10 +25,14 @@ const initWebRoutes = (app) => {
     router.delete('/api/delete-user', userController.handleDeleteuser) //5 ; Admin xóa tài khoản 
     router.get('/api/count', userController.handleCount)  // Dasboard đếm số người dùng
 
+
        //----------------- API TOUR -------------------------------------------
 
     router.post('/api/creat-new-tour', upload.single('image'), tourController.handlNewtour);
-    router.get('/api/view-new-tour', tourController.handleGetAlltoure);
+    router.get('/api/view-new-tour', tourController.handleGetAlltoure); // xem
+    router.put('/api/update-tour', tourController.handleUpdateToure); // sửa
+    router.delete('/api/delete-tour', tourController.handleDelete);
+ 
  
 
 

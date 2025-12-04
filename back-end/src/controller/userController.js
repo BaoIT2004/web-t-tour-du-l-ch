@@ -32,7 +32,7 @@ let handleGetAllUser = async (req, res) => {
         })
     }
 
-    let users = await userServices.handleGetAllUser(id);
+    let tours = await userServices.handleGetAllUser(id);
     return res.status(200).json({
         errCode: 0,
         errMessage: 'find user',
@@ -85,12 +85,11 @@ let handleCount = async (req, res)=> {
     }
 }
 
-
-module.exports = {
-    handleLogin: handleLogin,
-    handleGetAllUser: handleGetAllUser,
-    handleSignup: handleSignup,
-    handleEdituser: handleEdituser,
-    handleDeleteuser: handleDeleteuser,
-    handleCount: handleCount
-}
+export default {
+    handleLogin,
+    handleGetAllUser,
+    handleSignup,
+    handleEdituser,
+    handleDeleteuser,
+    handleCount
+};

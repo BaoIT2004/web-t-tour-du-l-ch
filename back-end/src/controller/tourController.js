@@ -52,8 +52,46 @@ let handleGetAlltoure = async (req, res) => {
     })
 };
 
+let handleBooktour = async (req, res) => {
+  let data = req.body;
+  console.log("BODY GỬI LÊN TỪ CLIENT:", req.body);
+  let message = await tourServices.bookDataTour(data);
+  return res.status(200).json(message)
+}
 
-module.exports = {
+let handleEditour = async (req, res) => {
+  let data = req.body;
+  console.log("BODY GỬI LÊN TỪ CLIENT:", req.body);
+  let message = await tourServices.updateTour(data);
+  return res.status(200).json(message)
+}
+
+let handleUpdateToure = async (req, res) => {
+    let data = req.body;
+    console.log("BODY GỬI LÊN TỪ CLIENT:", req.body);
+    let message = await tourServices.updateTourData(data);
+    return res.status(200).json(message)
+}
+
+let handleDelete = async (req, res) => {
+  if (!req.body.id) {
+    return res.status(200).json({
+      errCode: 1,
+      errMessage: "Missing required parameters!"
+    });
+  }
+  let message = await tourServices.deletetour(req.body.id)
+  console.log(message);
+  return res.status(200).json(message);
+}
+
+
+
+export default {
   handlNewtour,
   handleGetAlltoure,
+  handleBooktour,
+  handleEditour,
+  handleUpdateToure,
+  handleDelete
 };
