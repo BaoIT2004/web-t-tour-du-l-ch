@@ -2852,3 +2852,56 @@ input[type="password"]:focus {
   padding: 8px 12px;
 }
 
+
+/* Khung ngoài */
+.tt-section-box {
+  margin: 24px 0;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e4e7ec;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  overflow: hidden;              /* để textarea ôm luôn bo góc */
+}
+
+/* Header */
+.tt-section-header {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2933;
+  background: #f4f7ff;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+/* Form: bỏ padding để textarea không bị thụt vào */
+.tt-step-form {
+  padding: 0;
+}
+
+/* Textarea full width, sát viền, không bị lệch */
+.tt-step-input {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  min-height: 250px;       /* tăng chiều cao mặc định */
+  line-height: 1.6;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 0;
+  border-top: 1px solid #e4e7ec;
+  background-color: #ffffff;
+  resize: none;           /* không cho người dùng resize */
+  overflow: hidden !important; /* bỏ scroll */
+}
+
+
+.tt-step-input::placeholder {
+  color: #9ca3af;
+}
+
+.tt-step-input:focus {
+  outline: none;
+  background-color: #fff;
+}
+
