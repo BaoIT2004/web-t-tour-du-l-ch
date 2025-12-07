@@ -29,7 +29,7 @@ const Qltour = () => {
   const [errors, setErrors] = useState({});
   const [editTourId, setEditTourId] = useState(null);
 
-  // filter
+  // ========== FILTER ==========
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return tours;
@@ -44,7 +44,7 @@ const Qltour = () => {
     });
   }, [tours, query, field]);
 
-  // load
+  // ========== LOAD TOURS ==========
   useEffect(() => {
     fetch("http://localhost:3000/api/view-new-tour")
       .then((res) => res.json())
@@ -57,24 +57,22 @@ const Qltour = () => {
       .catch((err) => console.log("Lỗi fetch:", err));
   }, []);
 
-  // helpers
+  // ========== HELPERS ==========
   const change = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
   const validate = () => {
     const e = {};
-    if (!form.tourName || !form.tourName.trim()) e.tourName = "Name tour is required";
+    if (!form.tourName?.trim()) e.tourName = "Name tour is required";
     if (!String(form.tourPrice || "").trim()) e.tourPrice = "Tour price is required";
-    if (!form.description || !form.description.trim()) e.description = "Description is required";
+    if (!form.description?.trim()) e.description = "Description is required";
     return e;
   };
 
-  // delete
+  // ========== DELETE TOUR ==========
   const handleDelete = async (tourId) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa tour này không?")) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/delete-tour?id=${tourId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`http://localhost:3000/api/delete-tour?id=${tourId}`, { method: "DELETE" });
       const data = await res.json();
       if (data.errCode === 0) {
         setTours((prev) => prev.filter((x) => x.id !== tourId));
@@ -88,31 +86,23 @@ const Qltour = () => {
     }
   };
 
-  // open add
+  // ========== FORM HANDLERS ==========
   const openAdd = () => {
     setForm({ ...EMPTY_FORM });
     setErrors({});
     setEditTourId(null);
+    setPreviewImage(null);
     setShowForm(true);
   };
 
-  // open edit - IMPORTANT: sets itinerary so it displays immediately
   const openEdit = (tour) => {
-    console.log("Tour nhận vào:", tour);
     setEditTourId(tour.id ?? null);
 
-    // Normalize itinerary fields (support several key casings)
     const formattedItinerary = (tour.itinerary || []).map((it) => ({
       schedule: it.schedule ?? it.Schedule ?? "",
       note: it.note ?? it.Note ?? "",
-      startDate:
-        it.startDate?.substring?.(0, 10) ??
-        it.StartDate?.substring?.(0, 10) ??
-        "",
-      endDate:
-        it.endDate?.substring?.(0, 10) ??
-        it.EndDate?.substring?.(0, 10) ??
-        "",
+      startDate: it.startDate?.substring?.(0, 10) ?? it.StartDate?.substring?.(0, 10) ?? "",
+      endDate: it.endDate?.substring?.(0, 10) ?? it.EndDate?.substring?.(0, 10) ?? "",
       status: it.status ?? it.Status ?? "1",
     }));
 
@@ -129,7 +119,8 @@ const Qltour = () => {
     });
 
     setErrors({});
-    setShowForm(true); // show edit form with itinerary already present
+    setPreviewImage(null);
+    setShowForm(true);
   };
 
   const closeForm = () => {
@@ -140,18 +131,15 @@ const Qltour = () => {
     setPreviewImage(null);
   };
 
-  // itinerary handlers
+  // ========== ITINERARY HANDLERS ==========
   const addDay = () => {
-    const newItem = { schedule: "", startDate: "", endDate: "", status: "1", note: "" };
-    change("itinerary", [...(form.itinerary || []), newItem]);
+    change("itinerary", [...(form.itinerary || []), { schedule: "", startDate: "", endDate: "", status: "1", note: "" }]);
   };
-
   const removeDay = (index) => {
     const list = [...(form.itinerary || [])];
     list.splice(index, 1);
     change("itinerary", list);
   };
-
   const handleItineraryChange = (index, key, value) => {
     const list = [...(form.itinerary || [])];
     list[index] = { ...list[index], [key]: value };
@@ -166,112 +154,141 @@ const Qltour = () => {
     }
   };
 
-  // save (create/update)
-const saveForm = async () => {
-  const e = validate();
-  setErrors(e);
-  if (Object.keys(e).length) return;
-
-  try {
-    // Tạo object JSON từ form
-    const payload = {
-      tourName: form.tourName,
-      tourPrice: form.tourPrice,
-      description: form.description,
-      policy: form.policy,
-      included: form.included,
-      excluded: form.excluded,
-      activeid: form.activeid,
-      itinerary: form.itinerary || [], // đảm bảo là array
-    };
+  // ========== SAVE FORM (CREATE / UPDATE) ==========
+  const saveForm = async () => {
+    const e = validate();
+    setErrors(e);
+    if (Object.keys(e).length) return;
 
     if (editTourId) {
-      payload.id = editTourId;
+      const updated = await updateTour();
+      if (updated && form.img) await handleUpdateImage();
+    } else {
+      const newTour = await createTour();
+      if (newTour?.id && form.img) {
+        setEditTourId(newTour.id);
+        await handleUpdateImage();
+      }
     }
+  };
 
-    const res = await fetch("http://localhost:3000/api/update-tour", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+  // ========== CREATE TOUR ==========
+  const createTour = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("tourName", form.tourName);
+      formData.append("tourPrice", form.tourPrice);
+      formData.append("description", form.description);
+      formData.append("policy", form.policy);
+      formData.append("included", form.included);
+      formData.append("excluded", form.excluded);
+      formData.append("activeid", form.activeid);
+      formData.append("itinerary", JSON.stringify(form.itinerary || []));
+      if (form.img) formData.append("image", form.img);
 
-    // Nếu server trả status khác 2xx, đọc body vẫn cần, nhưng log để dễ debug
-    const data = await res.json();
-    console.log("SERVER RESPONSE (raw):", { status: res.status, ok: res.ok, body: data });
+      const res = await fetch("http://localhost:3000/api/creat-new-tour", { method: "POST", body: formData });
+      const data = await res.json();
 
-    if (!res.ok) {
-      // server trả lỗi http (404/500/...)
-      alert(data.errMessage || data.message || "Server trả lỗi HTTP " + res.status);
-      return;
-    }
-
-    if (data.errCode === 0) {
-      const returnedTour = data.tour || null;
-
-      if (editTourId) {
-        // Update local state using server's returned tour (đảm bảo đồng bộ)
-        setTours((prev) =>
-          prev.map((t) =>
-            t.id === editTourId
-              ? {
-                  ...t,
-                  // dùng data từ server nếu có, fallback về form nếu không có
-                  ...((returnedTour && typeof returnedTour === "object") ? returnedTour : {
-                    ...t,
-                    ...form,
-                    image: form.img ? URL.createObjectURL(form.img) : t.image
-                  })
-                }
-              : t
-          )
-        );
-        alert(data.errMessage || "Cập nhật tour thành công!");
-      } else {
-        // add new tour to local state — dùng data.tour nếu server trả
-        setTours((prev) => [...prev, returnedTour || {
-          id: Date.now(), // fallback id tạm
-          ...form,
-          image: form.img ? URL.createObjectURL(form.img) : null
-        }]);
-        alert(data.errMessage || "Tạo tour mới thành công!");
+      if (!res.ok || data.errCode !== 0) {
+        alert(data.errMessage || "Tạo tour thất bại!");
+        return null;
       }
 
+      setTours((prev) => [...prev, data.tour || { id: Date.now(), ...form, image: form.img ? URL.createObjectURL(form.img) : null }]);
+      alert("Tạo tour mới thành công!");
       closeForm();
-    } else {
-      // errCode !== 0
-      alert(data.errMessage || "Thất bại");
+      return data.tour;
+    } catch (err) {
+      console.error("createTour error:", err);
+      alert("Lỗi kết nối server!");
+      return null;
     }
-  } catch (err) {
-    console.error("saveForm error:", err);
-    alert("Lỗi kết nối server!");
-  }
-};
+  };
 
+  // ========== UPDATE TOUR ==========
+  const updateTour = async () => {
+    try {
+      const payload = {
+        id: editTourId,
+        tourName: form.tourName,
+        tourPrice: form.tourPrice,
+        description: form.description,
+        policy: form.policy,
+        included: form.included,
+        excluded: form.excluded,
+        activeid: form.activeid,
+        itinerary: form.itinerary || [],
+      };
 
+      const res = await fetch("http://localhost:3000/api/update-tour", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await res.json();
+
+      if (!res.ok || data.errCode !== 0) {
+        alert(data.errMessage || "Cập nhật tour thất bại!");
+        return false;
+      }
+
+      setTours((prev) =>
+        prev.map((t) =>
+          t.id === editTourId
+            ? { ...t, ...(data.tour || {}), image: form.img ? URL.createObjectURL(form.img) : t.image }
+            : t
+        )
+      );
+
+      alert("Cập nhật tour thành công!");
+      closeForm();
+      return true;
+    } catch (err) {
+      console.error("updateTour error:", err);
+      alert("Lỗi kết nối server!");
+      return false;
+    }
+  };
+
+  // ========== HANDLE IMAGE UPLOAD ==========
+  const handleUpdateImage = async () => {
+    if (!form.img || !editTourId) return false;
+
+    try {
+      const formData = new FormData();
+      formData.append("id", editTourId);
+      formData.append("image", form.img);
+
+      const res = await fetch("http://localhost:3000/api/update-tour-image", { method: "PUT", body: formData });
+      const data = await res.json();
+
+      if (data.errCode === 0) {
+        setPreviewImage(null);
+        setTours((prev) =>
+          prev.map((t) => (t.id === editTourId ? { ...t, image: URL.createObjectURL(form.img) } : t))
+        );
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Update image error:", err);
+      return false;
+    }
+  };
+
+  // ===================== RENDER =====================
   return (
     <div className="dash-page">
       <aside className="dash-sidebar">
         <div className="dash-sidebar-header">
           <div className="dash-sidebar-title">Dashboard</div>
         </div>
-
         <nav className="dash-sidebar-menu">
           <button className="dash-menu-item">
             <i className="fa-solid fa-route" /> Tours
           </button>
         </nav>
-
         <div className="dash-sidebar-footer">
           <button className="dash-user-info" onClick={toggleUserMenu}>
-            <div className="dash-avatar">
-              <i className="fa-regular fa-user" />
-            </div>
-            <div className="dash-avatar-label">
-              <span>Admin</span>
-              <span>online</span>
-            </div>
+            <div className="dash-avatar"><i className="fa-regular fa-user" /></div>
+            <div className="dash-avatar-label"><span>Admin</span><span>online</span></div>
           </button>
-
           {isUserMenuOpen && (
             <div className="dash-user-menu">
               <button className="dash-user-menu-item">Dashboard</button>
@@ -285,126 +302,89 @@ const saveForm = async () => {
       </aside>
 
       <main className="dash-main">
-        <header className="dash-main-header">
-          <h1>Tours</h1>
-        </header>
-
+        <header className="dash-main-header"><h1>Tours</h1></header>
         <section className="dash-main-body">
           {showForm ? (
             <div className="dash-panel">
               <div className="dash-form-actions">
-                <button className="dash-btn dash-btn-primary" onClick={saveForm}>
-                  Save
-                </button>
-                <button className="dash-btn" onClick={closeForm}>
-                  Return
-                </button>
+                <button className="dash-btn dash-btn-primary" onClick={saveForm}>Save</button>
+                <button className="dash-btn" onClick={closeForm}>Return</button>
               </div>
 
               <div className="dash-addform">
+                {/* FORM GRID */}
                 <div className="dash-form-grid">
                   <label className="dash-form-label">Name Tour</label>
                   <div>
-                    <input
-                      className="dash-input dash-input-lg dash-w100"
-                      value={form.tourName}
-                      onChange={(e) => change("tourName", e.target.value)}
-                    />
+                    <input className="dash-input dash-input-lg dash-w100" value={form.tourName} onChange={(e) => change("tourName", e.target.value)} />
                     {errors.tourName && <div className="dash-form-error">{errors.tourName}</div>}
                   </div>
 
                   <label className="dash-form-label">Tour Price</label>
                   <div>
-                    <input
-                      className="dash-input dash-input-lg dash-w100"
-                      value={form.tourPrice}
-                      onChange={(e) => change("tourPrice", e.target.value)}
-                    />
+                    <input className="dash-input dash-input-lg dash-w100" value={form.tourPrice} onChange={(e) => change("tourPrice", e.target.value)} />
                     {errors.tourPrice && <div className="dash-form-error">{errors.tourPrice}</div>}
                   </div>
 
                   <label className="dash-form-label">Description</label>
                   <div>
-                    <input
-                      className="dash-input dash-input-lg dash-w100"
-                      value={form.description}
-                      onChange={(e) => change("description", e.target.value)}
-                    />
+                    <input className="dash-input dash-input-lg dash-w100" value={form.description} onChange={(e) => change("description", e.target.value)} />
                     {errors.description && <div className="dash-form-error">{errors.description}</div>}
                   </div>
 
                   <label className="dash-form-label">Choose Image</label>
                   <div>
-                    <input className="dash-input dash-input-lg dash-w100" type="file" accept="image/*" onChange={handleImgChange} />
+                    <input type="file" accept="image/*" className="dash-input dash-input-lg dash-w100" onChange={handleImgChange} />
                     {previewImage && <div style={{ marginTop: 8 }}><img src={previewImage} alt="preview" style={{ width: 140, borderRadius: 6 }} /></div>}
                   </div>
 
                   <label className="dash-form-label">Policy</label>
-                  <div>
-                    <input className="dash-input dash-input-lg dash-w100" value={form.policy} onChange={(e) => change("policy", e.target.value)} />
-                  </div>
+                  <input className="dash-input dash-input-lg dash-w100" value={form.policy} onChange={(e) => change("policy", e.target.value)} />
 
                   <label className="dash-form-label">Included</label>
-                  <div>
-                    <input className="dash-input dash-input-lg dash-w100" value={form.included} onChange={(e) => change("included", e.target.value)} />
-                  </div>
+                  <input className="dash-input dash-input-lg dash-w100" value={form.included} onChange={(e) => change("included", e.target.value)} />
 
                   <label className="dash-form-label">Excluded</label>
-                  <div>
-                    <input className="dash-input dash-input-lg dash-w100" value={form.excluded} onChange={(e) => change("excluded", e.target.value)} />
-                  </div>
+                  <input className="dash-input dash-input-lg dash-w100" value={form.excluded} onChange={(e) => change("excluded", e.target.value)} />
 
                   <label className="dash-form-label">Status</label>
-                  <div>
-                    <select className="dash-input dash-input-lg dash-w100" value={form.activeid} onChange={(e) => change("activeid", Number(e.target.value))}>
-                      <option value={1}>Active</option>
-                      <option value={0}>Not Active</option>
-                    </select>
-                  </div>
+                  <select className="dash-input dash-input-lg dash-w100" value={form.activeid} onChange={(e) => change("activeid", Number(e.target.value))}>
+                    <option value={1}>Active</option>
+                    <option value={0}>Not Active</option>
+                  </select>
                 </div>
 
+                {/* ITINERARY */}
                 <h3 style={{ marginTop: 20 }}>Nhập lịch trình tour</h3>
                 <div id="form-wrapper">
                   {(form.itinerary || []).map((item, index) => (
                     <div className="day-item" key={index} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 12 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <strong>Lịch trình {index + 1}</strong>
-                        <button type="button" className="dash-btn dash-btn-sm dash-btn-danger" onClick={() => removeDay(index)}>
-                          Xóa
-                        </button>
+                        <button type="button" className="dash-btn dash-btn-sm dash-btn-danger" onClick={() => removeDay(index)}>Xóa</button>
                       </div>
-
-                      <label className="dash-form-label" style={{ marginTop: 8 }}>
-                        Lịch trình tour
-                      </label>
-                      <textarea className="dash-input dash-w100" placeholder="Nhập mô tả lịch trình..." rows={6} value={item.schedule} onChange={(e) => handleItineraryChange(index, "schedule", e.target.value)} />
-
+                      <label className="dash-form-label">Lịch trình tour</label>
+                      <textarea className="dash-input dash-w100" rows={6} placeholder="Nhập mô tả..." value={item.schedule} onChange={(e) => handleItineraryChange(index, "schedule", e.target.value)} />
                       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
                         <div style={{ flex: 1 }}>
                           <label className="dash-form-label">Ngày đi</label>
                           <input type="date" className="dash-input dash-w100" value={item.startDate} onChange={(e) => handleItineraryChange(index, "startDate", e.target.value)} />
                         </div>
-
                         <div style={{ flex: 1 }}>
                           <label className="dash-form-label">Ngày về</label>
                           <input type="date" className="dash-input dash-w100" value={item.endDate} onChange={(e) => handleItineraryChange(index, "endDate", e.target.value)} />
                         </div>
                       </div>
-
-                      <label className="dash-form-label" style={{ marginTop: 8 }}>
-                        Ghi chú
-                      </label>
+                      <label className="dash-form-label">Ghi chú</label>
                       <textarea className="dash-input dash-w100" rows={2} placeholder="Ghi chú thêm..." value={item.note} onChange={(e) => handleItineraryChange(index, "note", e.target.value)} />
                     </div>
                   ))}
                 </div>
-
-                <button type="button" className="dash-btn dash-btn-sm" onClick={addDay}>
-                  + Thêm lịch trình
-                </button>
+                <button type="button" className="dash-btn dash-btn-sm" onClick={addDay}>+ Thêm lịch trình</button>
               </div>
             </div>
           ) : (
+            // TABLE VIEW
             <div className="dash-panel">
               <div className="dash-toolbar">
                 <input className="dash-input" placeholder="Search..." value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -414,9 +394,7 @@ const saveForm = async () => {
                   <option value="tourPrice">Price</option>
                   <option value="description">Description</option>
                 </select>
-                <button className="dash-btn dash-btn-primary" onClick={openAdd}>
-                  + Add
-                </button>
+                <button className="dash-btn dash-btn-primary" onClick={openAdd}>+ Add</button>
               </div>
 
               <div className="dash-table-card">
@@ -432,13 +410,12 @@ const saveForm = async () => {
                       <th style={{ textAlign: "right" }}>Action</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} style={{ textAlign: "center", padding: 20 }}>
-                          No data
-                        </td>
+                      <tr><td colSpan={7}
+                        style={{ textAlign: "center", padding: 20 }}>
+                        No data
+                      </td>
                       </tr>
                     ) : (
                       filtered.map((t, idx) => (
@@ -446,31 +423,62 @@ const saveForm = async () => {
                           <td>{idx + 1}.</td>
                           <td>
                             {t.image ? (
-                              <img src={`http://localhost:3000${t.image}`} alt={t.tourName || t.name} style={{ width: 40, height: 40, borderRadius: 4, objectFit: "cover" }} />
+                              <img
+                                src={t.image.startsWith("http") ? t.image : `http://localhost:3000${t.image}`}
+                                alt={t.tourName || t.name}
+                                style={{ width: 40, height: 40, borderRadius: 4, objectFit: "cover" }}
+                              />
                             ) : (
-                              <div style={{ width: 40, height: 40, border: "1px solid #ccc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  border: "1px solid #ccc",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
                                 <i className="fa-regular fa-image" />
                               </div>
                             )}
                           </td>
-
                           <td>{t.tourName}</td>
                           <td>{t.tourPrice}</td>
                           <td>{t.description}</td>
-
                           <td>
                             {Number(t.activeid) === 1 ? (
-                              <span style={{ padding: "4px 8px", background: "#d1fae5", color: "#065f46", borderRadius: 4, fontSize: 12, fontWeight: 600 }}>Active</span>
+                              <span
+                                style={{
+                                  padding: "4px 8px",
+                                  background: "#d1fae5",
+                                  color: "#065f46",
+                                  borderRadius: 4,
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Active
+                              </span>
                             ) : (
-                              <span style={{ padding: "4px 8px", background: "#fee2e2", color: "#991b1b", borderRadius: 4, fontSize: 12, fontWeight: 600 }}>Not Active</span>
+                              <span
+                                style={{
+                                  padding: "4px 8px",
+                                  background: "#fee2e2",
+                                  color: "#991b1b",
+                                  borderRadius: 4,
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Not Active
+                              </span>
                             )}
                           </td>
-
                           <td style={{ textAlign: "right" }}>
                             <button className="dash-btn dash-btn-icon" onClick={() => openEdit(t)}>
                               <i className="fa-regular fa-pen-to-square" />
                             </button>
-
                             <button className="dash-btn dash-btn-icon dash-btn-danger" onClick={() => handleDelete(t.id)}>
                               <i className="fa-regular fa-trash-can" />
                             </button>
