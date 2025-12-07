@@ -1,150 +1,192 @@
-import db from '../models/index.js';
+const db = require('../models/index.js');
+
+function parseSchedules(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  try {
+    return JSON.parse(payload);
+  } catch (e) {
+    return [];
+  }
+}
+
+function buildSchedulePayload(tourId, item) {
+  return {
+    tourId,
+    itinerary: item.schedule ?? null,
+    startDate: item.startDate ?? null,
+    endDate: item.endDate ?? null,
+    status: item.status === undefined ? false : Boolean(Number(item.status)),
+    notes: item.note ?? null
+  };
+}
 
 let handlNewtour = (data, file) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Parse schedules nếu client gửi dưới dạng chuỗi JSON
-            const schedules = data.itinerary ? JSON.parse(data.itinerary) : [];
+  return new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+    try {
+      const schedules = parseSchedules(data.itinerary);
 
+      const created = await db.Tours.create({
+        tourName: data.tourName,
+        tourPrice: data.tourPrice,
+        description: data.description,
+        // với tạo mới, nếu ko upload ảnh mới thì để null hoặc lấy từ data.image nếu client gửi
+        image: file ? `/image/${file.filename}` : (data.image || null),
+        policy: data.policy,
+        included: data.included,
+        excluded: data.excluded,
+        activeid: Boolean(Number(data.activeid))
+      }, { transaction: t });
 
-            // Tạo Tour kèm lịch trình
-            const newTour = await db.Tours.create({
-                tourName: data.tourName,
-                tourPrice: data.tourPrice,
-                description: data.description,
-                image: file ? `/image/${file.filename}` : null,
-                policy: data.policy,
-                included: data.included,
-                excluded: data.excluded,
-                activeid: data.activeid,
-                schedules: schedules // thêm schedules
-            }, {
-                include: [{ model: db.schedule, as: 'schedules' }] // alias phải trùng model
-            });
+      if (schedules.length) {
+        const createPromises = schedules.map(it => db.schedule.create(buildSchedulePayload(created.id, it), { transaction: t }));
+        await Promise.all(createPromises);
+      }
 
-            for (let item of schedules) {
-                await db.schedule.create({
-                    tourId: newTour.id,
-                    itinerary: item.schedule,
-                    startDate: item.startDate,
-                    endDate: item.endDate,
-                    status: item.status,
-                    notes: item.note
-                });
-            }
+      await t.commit();
 
+      // Lấy lại tour và schedules để trả về
+      const tour = await db.Tours.findOne({ where: { id: created.id } });
+      const schedulesArr = await db.schedule.findAll({ where: { tourId: created.id } });
+      
 
-            resolve({
-                errCode: 0,
-                errMessage: 'Tour created successfully with schedules!',
-                tour: newTour
-            });
-        } catch (err) {
-            console.error("Error in handlNewtour:", err);
-            reject({
-                errCode: -1,
-                errMessage: 'Failed to create tour',
-                error: err
-            });
-        }
-    });
+      const result = (tour && typeof tour.toJSON === 'function') ? tour.toJSON() : tour;
+      result.schedules = schedulesArr;
+
+      resolve({
+        errCode: 0,
+        errMessage: 'Tạo tour thành công kèm lịch trình!',
+        tour: result
+      });
+    } catch (err) {
+      if (t) await t.rollback();
+      console.error('Lỗi trong handlNewtour:', err);
+      reject({
+        errCode: -1,
+        errMessage: 'Tạo tour thất bại',
+        error: err
+      });
+    }
+  });
 };
-
 
 let getAllTours = (tourId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let tours;
-            if (!tourId) {
-                return resolve([]);
-            }
-            if (tourId === 'ALL') {
-                const tours = await db.Tours.findAll({});
-                return resolve(tours);
-            }
-
-            tours = await db.Tours.findOne({
-                where: { id: tourId },
-            });
-
-            resolve(tours);
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-let  updateTourData = async (data, file) => {
+  return new Promise(async (resolve, reject) => {
     try {
-        const schedules = Array.isArray(data.itinerary) ? data.itinerary : (data.itinerary ? JSON.parse(data.itinerary) : []);
+      if (!tourId) {
+        return resolve([]);
+      }
 
-        const newTour = await db.Tours.create({
-            tourName: data.tourName,
-            tourPrice: data.tourPrice,
-            description: data.description,
-            image: file ? `/image/${file.filename}` : null,
-            policy: data.policy,
-            included: data.included,
-            excluded: data.excluded,
-            activeid: Boolean(Number(data.activeid))
-        });
+      if (tourId === 'ALL') {
+        const tours = await db.Tours.findAll();
+        return resolve(tours);
+      }
 
-        for (let item of schedules) {
-            await db.schedule.create({
-                tourId: newTour.id,
-                itinerary: item.schedule,
-                startDate: item.startDate,
-                endDate: item.endDate,
-                status: item.status === undefined ? false : Boolean(Number(item.status)),
-                notes: item.note
-            });
-        }
+      const tour = await db.Tours.findOne({ where: { id: tourId } });
+      if (!tour) return resolve(null);
 
-        return {
-            errCode: 0,
-            errMessage: 'Tour created successfully with schedules!',
-            tour: newTour
-        };
+      const schedules = await db.schedule.findAll({ where: { tourId } });
+      const result = (typeof tour.toJSON === 'function') ? tour.toJSON() : tour;
+      result.schedules = schedules;
 
+      resolve(result);
     } catch (err) {
-        console.error("Error in handlNewtour:", err);
-        return {
-            errCode: -1,
-            errMessage: 'Failed to create tour',
-            error: err
-        };
+      reject(err);
     }
+  });
 };
 
 
-let deletetour = (id) => {
-    return new Promise(async (resolve, reject) => {
-        let tour = await db.Tours.findOne({
-            where: { id: id }
-        })
-        if (!tour) {
-            return resolve({
-                errCode: 2,
-                errMessage: `the tour isn't exist`
-            })
-        }
+let updateTourData = async (data, file) => {
+  const t = await db.sequelize.transaction();
+  try {
+    const schedules = parseSchedules(data.itinerary);
+    // Kiểm tra tồn tại tour 
+    const tour = await db.Tours.findOne({ where: { id: data.id }, transaction: t });
+    if (!tour) {
+      await t.rollback();
+      return { errCode: 2, errMessage: 'Tour không tồn tại' };
+    }
 
-        await db.Tours.destroy({
-            where: { id: id }
-        });  // 26:08
-
-        return resolve({
-            errCode: 0,
-            message: `The tour is deleted`
-        })
+    // Cập nhật (
+    await db.Tours.update({
+      tourName: data.tourName,
+      tourPrice: data.tourPrice,
+      description: data.description,
+      image: file ? `/image/${file.filename}` : tour.image,
+      policy: data.policy,
+      included: data.included,
+      excluded: data.excluded,
+      activeid: Boolean(Number(data.activeid))
+    }, {
+      where: { id: data.id },
+      transaction: t
     });
-}
 
+    // Xóa lịch trình cũ rồi thêm lịch trình mới (trong cùng transaction)
+    await db.schedule.destroy({ where: { tourId: data.id }, transaction: t });
 
+    if (schedules.length) {
+      const createPromises = schedules.map(it => db.schedule.create(buildSchedulePayload(data.id, it), { transaction: t }));
+      await Promise.all(createPromises);
+    }
 
-module.exports = {
-    handlNewtour: handlNewtour,
-    getAllTours: getAllTours,
-    updateTourData: updateTourData,
-    deletetour: deletetour
+    await t.commit();
+
+    // Lấy lại tour & schedules (tách query để tránh lỗi include/separate)
+    const updatedTour = await db.Tours.findOne({ where: { id: data.id } });
+    const schedulesArr = await db.schedule.findAll({ where: { tourId: data.id } });
+
+    console.log(">>> updatedTour:", updatedTour);
+console.log(">>> schedulesArr:", schedulesArr);
+console.log(">>> schedules parsed:", schedules);
+
+    const result = (updatedTour && typeof updatedTour.toJSON === 'function') ? updatedTour.toJSON() : updatedTour;
+    result.schedules = schedulesArr;
+
+    return {
+      errCode: 0,
+      errMessage: 'Cập nhật tour thành công kèm lịch trình!',
+      tour: result
+    };
+  } catch (err) {
+    if (t) await t.rollback();
+    console.error('Lỗi trong updateTourData:', err);
+    return {
+      errCode: -1,
+      errMessage: 'Cập nhật tour thất bại',
+      error: err
+    };
+  }
+};
+
+//  * Xóa tour (và schedules liên quan)
+let deletetour = (id) => {
+  return new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+    try {
+      const tour = await db.Tours.findOne({ where: { id }, transaction: t });
+      if (!tour) {
+        await t.rollback();
+        return resolve({ errCode: 2, errMessage: 'Tour không tồn tại' });
+      }
+      // Xóa schedules trước (nếu muốn)
+      await db.schedule.destroy({ where: { tourId: id }, transaction: t });
+      await db.Tours.destroy({ where: { id }, transaction: t });
+      await t.commit();
+      return resolve({ errCode: 0, message: 'Xóa tour thành công' });
+    } catch (err) {
+      if (t) await t.rollback();
+      console.error('Lỗi trong deletetour:', err);
+      return reject({ errCode: -1, errMessage: 'Xóa tour thất bại', error: err });
+    }
+  });
+};
+
+module.exports = { 
+    handlNewtour: handlNewtour, 
+    getAllTours: getAllTours, 
+    updateTourData: updateTourData, 
+    deletetour: deletetour 
 };
