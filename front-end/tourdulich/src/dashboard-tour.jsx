@@ -167,112 +167,86 @@ const Qltour = () => {
   };
 
   // save (create/update)
-  const saveForm = async () => {
-    const e = validate();
-    setErrors(e);
-    if (Object.keys(e).length) return;
+const saveForm = async () => {
+  const e = validate();
+  setErrors(e);
+  if (Object.keys(e).length) return;
 
-    if (!editTourId) {
-      // create
-      try {
-        const formData = new FormData();
-        const formattedItineraries = (form.itinerary || []).map((it) => ({
-          ...it,
-          startDate: it.startDate ? it.startDate + " 07:00:00" : null,
-          endDate: it.endDate ? it.endDate + " 07:00:00" : null,
-        }));
-        if (form.img) formData.append("image", form.img);
-        formData.append("tourName", form.tourName);
-        formData.append("tourPrice", form.tourPrice);
-        formData.append("description", form.description);
-        formData.append("policy", form.policy);
-        formData.append("included", form.included);
-        formData.append("excluded", form.excluded);
-        formData.append("activeid", String(form.activeid));
-        formData.append("itinerary", JSON.stringify(formattedItineraries));
+  try {
+    // Tạo object JSON từ form
+    const payload = {
+      tourName: form.tourName,
+      tourPrice: form.tourPrice,
+      description: form.description,
+      policy: form.policy,
+      included: form.included,
+      excluded: form.excluded,
+      activeid: form.activeid,
+      itinerary: form.itinerary || [], // đảm bảo là array
+    };
 
-        const res = await fetch("http://localhost:3000/api/creat-new-tour", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (data.errCode === 0) {
-          // backend should ideally return the created tour
-          setTours((prev) => [...prev, data.tour ?? { id: Date.now(), ...form }]);
-          alert("Thêm tour thành công!");
-          closeForm();
-        } else {
-          alert(data.errMessage || "Thêm tour thất bại");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Lỗi kết nối server!");
-      }
+    if (editTourId) {
+      payload.id = editTourId;
+    }
+
+    const res = await fetch("http://localhost:3000/api/update-tour", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    // Nếu server trả status khác 2xx, đọc body vẫn cần, nhưng log để dễ debug
+    const data = await res.json();
+    console.log("SERVER RESPONSE (raw):", { status: res.status, ok: res.ok, body: data });
+
+    if (!res.ok) {
+      // server trả lỗi http (404/500/...)
+      alert(data.errMessage || data.message || "Server trả lỗi HTTP " + res.status);
       return;
     }
 
-    // update
-    try {
-      const body = {
-        id: editTourId,
-        tourName: form.tourName,
-        tourPrice: form.tourPrice,
-        description: form.description,
-        policy: form.policy,
-        included: form.included,
-        excluded: form.excluded,
-        activeid: form.activeid,
-        itinerary: form.itinerary || [],
-      };
+    if (data.errCode === 0) {
+      const returnedTour = data.tour || null;
 
-      const res = await fetch("http://localhost:3000/api/update-tour", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (data.errCode !== 0) {
-        alert(data.errMessage || "Cập nhật thất bại");
-        return;
+      if (editTourId) {
+        // Update local state using server's returned tour (đảm bảo đồng bộ)
+        setTours((prev) =>
+          prev.map((t) =>
+            t.id === editTourId
+              ? {
+                  ...t,
+                  // dùng data từ server nếu có, fallback về form nếu không có
+                  ...((returnedTour && typeof returnedTour === "object") ? returnedTour : {
+                    ...t,
+                    ...form,
+                    image: form.img ? URL.createObjectURL(form.img) : t.image
+                  })
+                }
+              : t
+          )
+        );
+        alert(data.errMessage || "Cập nhật tour thành công!");
+      } else {
+        // add new tour to local state — dùng data.tour nếu server trả
+        setTours((prev) => [...prev, returnedTour || {
+          id: Date.now(), // fallback id tạm
+          ...form,
+          image: form.img ? URL.createObjectURL(form.img) : null
+        }]);
+        alert(data.errMessage || "Tạo tour mới thành công!");
       }
 
-      // update image separately if needed
-      if (form.img) {
-        const imgForm = new FormData();
-        imgForm.append("id", editTourId);
-        imgForm.append("image", form.img);
-        await fetch("http://localhost:3000/api/update-tour-image", {
-          method: "PUT",
-          body: imgForm,
-        });
-      }
-
-      setTours((prev) =>
-        prev.map((t) =>
-          t.id === editTourId
-            ? {
-              ...t,
-              tourName: form.tourName,
-              tourPrice: form.tourPrice,
-              description: form.description,
-              image: form.img ? `/image/${form.img.name}` : t.image,
-              policy: form.policy,
-              included: form.included,
-              excluded: form.excluded,
-              activeid: form.activeid,
-              itinerary: form.itinerary,
-            }
-            : t
-        )
-      );
-
-      alert("Cập nhật thành công");
       closeForm();
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi kết nối server!");
+    } else {
+      // errCode !== 0
+      alert(data.errMessage || "Thất bại");
     }
-  };
+  } catch (err) {
+    console.error("saveForm error:", err);
+    alert("Lỗi kết nối server!");
+  }
+};
+
 
   return (
     <div className="dash-page">
