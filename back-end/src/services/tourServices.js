@@ -1,9 +1,14 @@
 import db from '../models/index.js';
 
-let handlNewtour = (data, file) => {  
+let handlNewtour = (data, file) => {
     return new Promise(async (resolve, reject) => {
         try {
-            await db.Tours.create({
+            // Parse schedules nếu client gửi dưới dạng chuỗi JSON
+            const schedules = data.itinerary ? JSON.parse(data.itinerary) : [];
+
+
+            // Tạo Tour kèm lịch trình
+            const newTour = await db.Tours.create({
                 tourName: data.tourName,
                 tourPrice: data.tourPrice,
                 description: data.description,
@@ -12,14 +17,35 @@ let handlNewtour = (data, file) => {
                 included: data.included,
                 excluded: data.excluded,
                 activeid: data.activeid,
+                schedules: schedules // thêm schedules
+            }, {
+                include: [{ model: db.schedule, as: 'schedules' }] // alias phải trùng model
             });
+
+            for (let item of schedules) {
+                await db.schedule.create({
+                    tourId: newTour.id,
+                    itinerary: item.schedule,
+                    startDate: item.startDate,
+                    endDate: item.endDate,
+                    status: item.status,
+                    notes: item.note
+                });
+            }
+
 
             resolve({
                 errCode: 0,
-                errMessage: 'Tour created successfully!'
+                errMessage: 'Tour created successfully with schedules!',
+                tour: newTour
             });
         } catch (err) {
-            reject(err);
+            console.error("Error in handlNewtour:", err);
+            reject({
+                errCode: -1,
+                errMessage: 'Failed to create tour',
+                error: err
+            });
         }
     });
 };
@@ -31,12 +57,12 @@ let getAllTours = (tourId) => {
             let tours;
             if (!tourId) {
                 return resolve([]);
-            } 
+            }
             if (tourId === 'ALL') {
                 const tours = await db.Tours.findAll({});
                 return resolve(tours);
-            } 
-                
+            }
+
             tours = await db.Tours.findOne({
                 where: { id: tourId },
             });
@@ -48,52 +74,48 @@ let getAllTours = (tourId) => {
     });
 }
 
-let updateTourData = (data, file) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!data.id) {
-                return resolve({
-                    errCode: 2,
-                    errMessage: 'Missing required parameters'
-                });
-            }
+let  updateTourData = async (data, file) => {
+    try {
+        const schedules = Array.isArray(data.itinerary) ? data.itinerary : (data.itinerary ? JSON.parse(data.itinerary) : []);
 
-            const id = Number(data.id);
-            console.log('ID sau khi Number():', id);
+        const newTour = await db.Tours.create({
+            tourName: data.tourName,
+            tourPrice: data.tourPrice,
+            description: data.description,
+            image: file ? `/image/${file.filename}` : null,
+            policy: data.policy,
+            included: data.included,
+            excluded: data.excluded,
+            activeid: Boolean(Number(data.activeid))
+        });
 
-            let tour = await db.Tours   .findOne({
-                where: { id: id },
-                raw: false
+        for (let item of schedules) {
+            await db.schedule.create({
+                tourId: newTour.id,
+                itinerary: item.schedule,
+                startDate: item.startDate,
+                endDate: item.endDate,
+                status: item.status === undefined ? false : Boolean(Number(item.status)),
+                notes: item.note
             });
-            console.log('TOUR tìm được trong updateTourData:', tour);
-
-            if (tour) {
-                if (file) {
-                    tour.image = `/image/${file.filename}`;
-                }
-                tour.tourName = data.tourName;
-                tour.tourPrice = data.tourPrice;
-                tour.description = data.description;
-                tour.excluded = data.excluded;
-                tour.activeid = data.activeid;
-
-                await tour.save();
-
-                return resolve({
-                    errCode: 0,
-                    message: 'Cập nhật tour thành công'
-                });
-            } else {
-                return resolve({
-                    errCode: 1,
-                    errMessage: 'Không tìm thấy tour'
-                });
-            }
-        } catch (e) {
-            reject(e);
         }
-    });
+
+        return {
+            errCode: 0,
+            errMessage: 'Tour created successfully with schedules!',
+            tour: newTour
+        };
+
+    } catch (err) {
+        console.error("Error in handlNewtour:", err);
+        return {
+            errCode: -1,
+            errMessage: 'Failed to create tour',
+            error: err
+        };
+    }
 };
+
 
 let deletetour = (id) => {
     return new Promise(async (resolve, reject) => {

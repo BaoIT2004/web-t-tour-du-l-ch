@@ -23,20 +23,23 @@ let handleLogin = async (req, res) => {
 // Hiển thị các user trong chức năng quản lí người dùng
 let handleGetAllUser = async (req, res) => {
     let id = req.query.id;
-    const allUsers = await db.User.findAll(); 
-    if(!id){
+
+    if (!id) {
+        let allUsers = await db.User.findAll();
+        console.log("Dữ liệu từ DB:", allUsers);
         return res.status(200).json({
-            errCode: 1,
-            errMessage: 'Missing required parameters',
+            errCode: 0,
+            errMessage: 'Get all users successfully',
             users: allUsers
         })
     }
 
-    let tours = await userServices.handleGetAllUser(id);
+
+    let users = await userServices.handleGetAllUser(id);
     return res.status(200).json({
         errCode: 0,
         errMessage: 'find user',
-        users
+        users: users
     })
 }
 
@@ -48,11 +51,11 @@ let handleSignup = async (req, res) => {
 }
 
 let handleDeleteuser = async (req, res) => {
-    if(!req.body.id){
+    if (!req.body.id) {
         return res.status(200).json({
-            errCode : 1,
+            errCode: 1,
             errMessage: "Missing required parameters!"
-            
+
         })
     }
     let message = await userServices.deleteUser(req.body.id);
@@ -67,16 +70,16 @@ let handleEdituser = async (req, res) => {
     return res.status(200).json(message)
 }
 
-let handleCount = async (req, res)=> {
-    try{
+let handleCount = async (req, res) => {
+    try {
         let toltal = await userServices.countUser();
-         return res.status(200).json({
+        return res.status(200).json({
             errCode: 0,
             toltal: toltal,
             errMessage: "Count users successfully!"
         });
 
-    }catch(err){
+    } catch (err) {
         console.log("Error in handleCountUsers:", err);
         return res.status(500).json({
             errCode: 1,

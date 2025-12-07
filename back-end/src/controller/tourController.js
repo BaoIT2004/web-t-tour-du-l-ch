@@ -6,6 +6,7 @@ let handlNewtour = async (req, res) => {
 
     console.log("FILE RECEIVED:", req.file);
     console.log("BODY RECEIVED:", req.body);
+    
     // xử lý đường dẫn ảnh từ multer
     console.log("FILE RECEIVED:", req.file);
     let imagePath = null;

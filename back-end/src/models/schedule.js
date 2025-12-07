@@ -13,14 +13,21 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     schedule.init({
+         id_schedule: {                  // thêm dòng này
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         itinerary: DataTypes.STRING,
         startDate: DataTypes.DATE,
         endDate: DataTypes.DATE,
         status: DataTypes.STRING,
-        notes: DataTypes.STRING
+        notes: DataTypes.STRING,
+        tourId: DataTypes.INTEGER   
     }, {
         sequelize,
         modelName: 'schedule',
+        timestamps: true
     });
     return schedule;
 }; 
