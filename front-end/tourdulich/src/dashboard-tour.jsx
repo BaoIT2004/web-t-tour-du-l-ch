@@ -1,6 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams,useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
+// ==========================
+// CONSTANTS
+// ==========================
 const INITIAL_TOURS = [];
 
 const EMPTY_FORM = {
@@ -15,49 +19,87 @@ const EMPTY_FORM = {
   itinerary: [],
 };
 
+// ==========================
+// COMPONENT
+// ==========================
 const Qltour = () => {
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
+  // STATE
 
+  const navigate = useNavigate(); 
   const [tours, setTours] = useState(INITIAL_TOURS);
+  const [selectedTour, setSelectedTour] = useState(null); // lưu tour đang chọn
   const [query, setQuery] = useState("");
   const [field, setField] = useState("all");
-  const [previewImage, setPreviewImage] = useState(null);
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [editTourId, setEditTourId] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
-  // ========== FILTER ==========
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
+
+  const [params] = useSearchParams();
+  const id = params.get("id");
+  useEffect(() => {
+    if (id) {
+      handleViewTourDetail(t.id); // load tour chi tiết khi URL có ?id=
+    }
+  }, [id]);
+  // EFFECT: LOAD TOURS
+  useEffect(() => {
+  const fetchTours = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/view-new-tour");
+      const data = await res.json();
+      setTours(data.tours || []);
+    } catch (err) {
+      console.error("Lỗi load tours:", err);
+    }
+  };
+  fetchTours();
+}, []);
+
+const handleViewTourDetail = async (id) => {
+  console.log("ID tour:", id); // đây là ID tour bạn click
+  try {
+    const res = await fetch(`http://localhost:3000/api/view-tour?id=${id}`);
+    const data = await res.json();
+     console.log("API Response:", data);
+
+    if (data.errCode === 0) {
+      // Hiển thị chi tiết   tour
+      console.log("Tour detail:", data.tour);
+      openEdit(data.tour);
+    } else {
+      alert(data.errMessage || "Không tìm thấy tour");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Lỗi server!");
+  }
+};
+
+
+  // FILTERED TOURS
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return tours;
+
     return tours.filter((t) => {
       const values = {
         tourName: (t.tourName || "").toString().toLowerCase(),
         tourPrice: (t.tourPrice || "").toString().toLowerCase(),
         description: (t.description || "").toString().toLowerCase(),
       };
-      if (field === "all") return Object.values(values).some((v) => v.includes(q));
-      return values[field]?.includes(q);
+      return field === "all"
+        ? Object.values(values).some((v) => v.includes(q))
+        : values[field]?.includes(q);
     });
   }, [tours, query, field]);
 
-  // ========== LOAD TOURS ==========
-  useEffect(() => {
-    fetch("http://localhost:3000/api/view-new-tour")
-      .then((res) => res.json())
-      .then((data) => {
-        const incoming = data?.tours;
-        if (Array.isArray(incoming)) setTours(incoming);
-        else if (incoming) setTours([incoming]);
-        else setTours([]);
-      })
-      .catch((err) => console.log("Lỗi fetch:", err));
-  }, []);
-
-  // ========== HELPERS ==========
+  // HELPERS
   const change = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
   const validate = () => {
@@ -68,34 +110,17 @@ const Qltour = () => {
     return e;
   };
 
-  // ========== DELETE TOUR ==========
-  const handleDelete = async (tourId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa tour này không?")) return;
-    try {
-      const res = await fetch(`http://localhost:3000/api/delete-tour?id=${tourId}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.errCode === 0) {
-        setTours((prev) => prev.filter((x) => x.id !== tourId));
-        alert("Xóa tour thành công");
-      } else {
-        alert(data.errMessage || "Xóa tour thất bại");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi server!");
-    }
-  };
-
-  // ========== FORM HANDLERS ==========
+  // FORM HANDLERS
   const openAdd = () => {
     setForm({ ...EMPTY_FORM });
     setErrors({});
-    setEditTourId(null);
+    setEditTourId(tour.id ?? null);
     setPreviewImage(null);
     setShowForm(true);
   };
 
   const openEdit = (tour) => {
+    console.log("Open edit tour:", tour);
     setEditTourId(tour.id ?? null);
 
     const formattedItinerary = (tour.itinerary || []).map((it) => ({
@@ -131,15 +156,19 @@ const Qltour = () => {
     setPreviewImage(null);
   };
 
-  // ========== ITINERARY HANDLERS ==========
-  const addDay = () => {
-    change("itinerary", [...(form.itinerary || []), { schedule: "", startDate: "", endDate: "", status: "1", note: "" }]);
-  };
+  // ITINERARY HANDLERS
+  const addDay = () =>
+    change("itinerary", [
+      ...(form.itinerary || []),
+      { schedule: "", startDate: "", endDate: "", status: "1", note: "" },
+    ]);
+
   const removeDay = (index) => {
     const list = [...(form.itinerary || [])];
     list.splice(index, 1);
     change("itinerary", list);
   };
+
   const handleItineraryChange = (index, key, value) => {
     const list = [...(form.itinerary || [])];
     list[index] = { ...list[index], [key]: value };
@@ -154,7 +183,24 @@ const Qltour = () => {
     }
   };
 
-  // ========== SAVE FORM (CREATE / UPDATE) ==========
+  // CRUD OPERATIONS
+  const handleDelete = async (tourId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa tour này không?")) return;
+    try {
+      const res = await fetch(`http://localhost:3000/api/delete-tour?id=${tourId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.errCode === 0) {
+        setTours((prev) => prev.filter((x) => x.id !== tourId));
+        alert("Xóa tour thành công");
+      } else {
+        alert(data.errMessage || "Xóa tour thất bại");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi server!");
+    }
+  };
+
   const saveForm = async () => {
     const e = validate();
     setErrors(e);
@@ -172,18 +218,20 @@ const Qltour = () => {
     }
   };
 
-  // ========== CREATE TOUR ==========
   const createTour = async () => {
     try {
       const formData = new FormData();
-      formData.append("tourName", form.tourName);
-      formData.append("tourPrice", form.tourPrice);
-      formData.append("description", form.description);
-      formData.append("policy", form.policy);
-      formData.append("included", form.included);
-      formData.append("excluded", form.excluded);
-      formData.append("activeid", form.activeid);
-      formData.append("itinerary", JSON.stringify(form.itinerary || []));
+      Object.entries({
+        tourName: form.tourName,
+        tourPrice: form.tourPrice,
+        description: form.description,
+        policy: form.policy,
+        included: form.included,
+        excluded: form.excluded,
+        activeid: form.activeid,
+        itinerary: JSON.stringify(form.itinerary || []),
+      }).forEach(([k, v]) => formData.append(k, v));
+
       if (form.img) formData.append("image", form.img);
 
       const res = await fetch("http://localhost:3000/api/creat-new-tour", { method: "POST", body: formData });
@@ -205,7 +253,6 @@ const Qltour = () => {
     }
   };
 
-  // ========== UPDATE TOUR ==========
   const updateTour = async () => {
     try {
       const payload = {
@@ -220,7 +267,11 @@ const Qltour = () => {
         itinerary: form.itinerary || [],
       };
 
-      const res = await fetch("http://localhost:3000/api/update-tour", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const res = await fetch("http://localhost:3000/api/update-tour", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       const data = await res.json();
 
       if (!res.ok || data.errCode !== 0) {
@@ -246,10 +297,8 @@ const Qltour = () => {
     }
   };
 
-  // ========== HANDLE IMAGE UPLOAD ==========
   const handleUpdateImage = async () => {
     if (!form.img || !editTourId) return false;
-
     try {
       const formData = new FormData();
       formData.append("id", editTourId);
@@ -302,7 +351,8 @@ const Qltour = () => {
       </aside>
 
       <main className="dash-main">
-        <header className="dash-main-header"><h1>Tours</h1></header>
+        <header className="dash-main-header"><h1>Tours1</h1></header>
+        {/** chi tiết */}
         <section className="dash-main-body">
           {showForm ? (
             <div className="dash-panel">
@@ -357,30 +407,99 @@ const Qltour = () => {
                 {/* ITINERARY */}
                 <h3 style={{ marginTop: 20 }}>Nhập lịch trình tour</h3>
                 <div id="form-wrapper">
-                  {(form.itinerary || []).map((item, index) => (
-                    <div className="day-item" key={index} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 12 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <strong>Lịch trình {index + 1}</strong>
-                        <button type="button" className="dash-btn dash-btn-sm dash-btn-danger" onClick={() => removeDay(index)}>Xóa</button>
-                      </div>
-                      <label className="dash-form-label">Lịch trình tour</label>
-                      <textarea className="dash-input dash-w100" rows={6} placeholder="Nhập mô tả..." value={item.schedule} onChange={(e) => handleItineraryChange(index, "schedule", e.target.value)} />
-                      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                        <div style={{ flex: 1 }}>
-                          <label className="dash-form-label">Ngày đi</label>
-                          <input type="date" className="dash-input dash-w100" value={item.startDate} onChange={(e) => handleItineraryChange(index, "startDate", e.target.value)} />
+                  {(form.itinerary && form.itinerary.length > 0 ? form.itinerary : [{ schedule: "", startDate: "", endDate: "", note: "", status: "1" }])
+                    .map((item, index) => (
+                      <div
+                        className="day-item"
+                        key={index}
+                        style={{ border: "1px solid #ddd", padding: 12, marginBottom: 12, borderRadius: 6 }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <strong>Ngày {index + 1}</strong>
+                          <button
+                            type="button"
+                            className="dash-btn dash-btn-sm dash-btn-danger"
+                            onClick={() => {
+                              const list = [...(form.itinerary || [])];
+                              list.splice(index, 1);
+                              setForm((prev) => ({ ...prev, itinerary: list }));
+                            }}
+                          >
+                            Xóa
+                          </button>
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <label className="dash-form-label">Ngày về</label>
-                          <input type="date" className="dash-input dash-w100" value={item.endDate} onChange={(e) => handleItineraryChange(index, "endDate", e.target.value)} />
+
+                        <label className="dash-form-label">Lịch trình tour</label>
+                        <textarea
+                          className="dash-input dash-w100"
+                          rows={4}
+                          placeholder="Nhập mô tả..."
+                          value={item.schedule}
+                          onChange={(e) => {
+                            const list = [...(form.itinerary || [])];
+                            list[index] = { ...list[index], schedule: e.target.value };
+                            setForm((prev) => ({ ...prev, itinerary: list }));
+                          }}
+                        />
+
+                        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                          <div style={{ flex: 1 }}>
+                            <label className="dash-form-label">Ngày đi</label>
+                            <input
+                              type="date"
+                              className="dash-input dash-w100"
+                              value={item.startDate}
+                              onChange={(e) => {
+                                const list = [...(form.itinerary || [])];
+                                list[index] = { ...list[index], startDate: e.target.value };
+                                setForm((prev) => ({ ...prev, itinerary: list }));
+                              }}
+                            />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <label className="dash-form-label">Ngày về</label>
+                            <input
+                              type="date"
+                              className="dash-input dash-w100"
+                              value={item.endDate}
+                              onChange={(e) => {
+                                const list = [...(form.itinerary || [])];
+                                list[index] = { ...list[index], endDate: e.target.value };
+                                setForm((prev) => ({ ...prev, itinerary: list }));
+                              }}
+                            />
+                          </div>
                         </div>
+
+                        <label className="dash-form-label">Ghi chú</label>
+                        <textarea
+                          className="dash-input dash-w100"
+                          rows={2}
+                          placeholder="Ghi chú thêm..."
+                          value={item.note}
+                          onChange={(e) => {
+                            const list = [...(form.itinerary || [])];
+                            list[index] = { ...list[index], note: e.target.value };
+                            setForm((prev) => ({ ...prev, itinerary: list }));
+                          }}
+                        />
                       </div>
-                      <label className="dash-form-label">Ghi chú</label>
-                      <textarea className="dash-input dash-w100" rows={2} placeholder="Ghi chú thêm..." value={item.note} onChange={(e) => handleItineraryChange(index, "note", e.target.value)} />
-                    </div>
-                  ))}
+                    ))}
+
+                  <button
+                    type="button"
+                    className="dash-btn dash-btn-sm dash-btn-primary"
+                    onClick={() => {
+                      setForm((prev) => ({
+                        ...prev,
+                        itinerary: [...(prev.itinerary || []), { schedule: "", startDate: "", endDate: "", note: "", status: "1" }],
+                      }));
+                    }}
+                  >
+                    + Thêm lịch trình
+                  </button>
                 </div>
-                <button type="button" className="dash-btn dash-btn-sm" onClick={addDay}>+ Thêm lịch trình</button>
+
               </div>
             </div>
           ) : (
@@ -476,7 +595,10 @@ const Qltour = () => {
                             )}
                           </td>
                           <td style={{ textAlign: "right" }}>
-                            <button className="dash-btn dash-btn-icon" onClick={() => openEdit(t)}>
+                            <button className="dash-btn dash-btn-icon" onClick={() => {
+                              handleViewTourDetail(t.id);      // gọi API hoặc lấy dữ liệu tour
+                              navigate(`/dattour/${t.id}`);    // chuyển hướng
+                            }}>
                               <i className="fa-regular fa-pen-to-square" />
                             </button>
                             <button className="dash-btn dash-btn-icon dash-btn-danger" onClick={() => handleDelete(t.id)}>
