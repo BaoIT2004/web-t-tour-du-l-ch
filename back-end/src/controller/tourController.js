@@ -4,9 +4,12 @@ import tourServices from '../services/tourServices';
 let handlNewtour = async (req, res) => {
   try {
 
-    console.log("FILE RECEIVED:", req.file);
-    console.log("BODY RECEIVED:", req.body);
-    
+    console.log('CONTENT-TYPE:', req.headers['content-type']);
+    console.log('req.file =', req.file);
+    console.log('req.files =', req.files);
+    console.log('req.body =', req.body);
+
+
     // xử lý đường dẫn ảnh từ multer
     console.log("FILE RECEIVED:", req.file);
     let imagePath = null;
@@ -74,18 +77,39 @@ let handleUpdateToure = async (req, res) => {
     return res.status(200).json(message)
 }
 
+
 let handleDelete = async (req, res) => {
-  if (!req.body.id) {
+  if (!req.query.id) {
     return res.status(200).json({
       errCode: 1,
       errMessage: "Missing required parameters!"
     });
   }
-  let message = await tourServices.deletetour(req.body.id)
+  let message = await tourServices.deletetour(req.query.id)
   console.log(message);
   return res.status(200).json(message);
 }
 
+
+let handleUpdateImageToure = async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const { id } = req.body;
+    const file = req.file;
+
+    const result = await tourServices.updateTourImage(id, file);
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error("Controller Error:", err);
+    return res.status(500).json({
+      errCode: -1,
+      errMessage: "Error from server"
+    });
+  }
+};
 
 
 export default {
@@ -94,5 +118,6 @@ export default {
   handleBooktour,
   handleEditour,
   handleUpdateToure,
+  handleUpdateImageToure,
   handleDelete
 };

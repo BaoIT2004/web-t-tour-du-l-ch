@@ -31,6 +31,7 @@ const initWebRoutes = (app) => {
     router.post('/api/creat-new-tour', upload.single('image'), tourController.handlNewtour);
     router.get('/api/view-new-tour', tourController.handleGetAlltoure); // xem
     router.put('/api/update-tour', tourController.handleUpdateToure); // sửa
+    router.put('/api/update-tour-image',   upload.single('image'),  tourController.handleUpdateImageToure); // sửa
     router.delete('/api/delete-tour', tourController.handleDelete);
  
  
