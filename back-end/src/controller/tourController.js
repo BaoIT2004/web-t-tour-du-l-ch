@@ -111,6 +111,27 @@ let handleUpdateImageToure = async (req, res) => {
   }
 };
 
+let handleGetTourById = async (req, res) => {
+  const id = req.query.id;
+  if (!id)
+    return res.json({
+      errCode: 1,
+      errMessage: "ID tour missing"
+    });
+  try {
+    const tour = await tourServices.getTourById(id);
+    if (!tour) return res.json({
+      errCode: 1,
+      errMessage: "Tour not found"
+    });
+
+    res.json({ errCode: 0, tour });
+  } catch (err) {
+    console.error(err);
+    res.json({ errCode: 2, errMessage: "Server error" });
+  }
+}
+
 
 export default {
   handlNewtour,
@@ -119,5 +140,6 @@ export default {
   handleEditour,
   handleUpdateToure,
   handleUpdateImageToure,
-  handleDelete
+  handleDelete,
+  handleGetTourById
 };

@@ -209,10 +209,35 @@ let deletetour = (id) => {
     });
 };
 
+let getTourById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const tour = await db.Tours.findOne({ where: { id } });
+            if (!tour) {
+                return resolve(null);
+            }
+            const schedules = await db.schedule.findAll({ where: { tourId: id } });
+            let result;
+            if (typeof tour.toJSON === 'function') {
+                result = tour.toJSON();
+            } else {
+                result = tour;
+            }
+
+            result.schedules = schedules;
+            resolve(result);
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
+}
+
 module.exports = {
     handlNewtour,
     getAllTours,
     updateTourData,
     deletetour,
-    updateTourImage 
+    updateTourImage,
+    getTourById
 };
