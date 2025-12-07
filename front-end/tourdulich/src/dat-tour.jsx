@@ -146,7 +146,7 @@ function TourHero({ tour }) {
                 <label>Trẻ em ▸ Age 12-</label>
                 <input
                   type="text"
-                  inputMode="numeric" 
+                  inputMode="numeric"
                   pattern="[0-9]*"
                   className="tt-select"
                   value={child}

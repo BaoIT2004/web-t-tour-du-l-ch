@@ -172,121 +172,128 @@ const Qluser = () => {
 
   // Thêm / Sửa
   const saveAdd = async () => {
-    const errs = validate();       // chạy validate
-    setErrors(errs);               // đẩy lỗi ra form
+  // Validate form trước
+  const errs = validate();
+  setErrors(errs);
+  if (Object.keys(errs).length > 0) {
+    console.log("Validation errors:", errs);
+    return; // có lỗi → dừng
+  }
 
-    if (Object.keys(errs).length > 0) return;  // có lỗi thì dừng
+  console.log("Form trước khi gửi:", form);
 
-    // =============== THÊM MỚI ===============
-    if (!editUserId) {
-      try {
-        const res = await fetch("http://localhost:3000/api/creat-new-user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+  //Thêm mới
+  if (!editUserId) {
+    try {
+      const res = await fetch("http://localhost:3000/api/creat-new-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          password: form.password,
+          address: form.address,
+          phone: form.phone,       // đồng bộ với backend
+          gender: form.gender,
+          roleid: form.role,       // số: 1 = Admin, 2 = Customer
+        }),
+      });
+
+      console.log("Status response:", res.status);
+
+      const data = await res.json();
+      console.log("Response từ server (create):", data);
+
+      // Xử lý response
+      if (data.errCode === 1) {
+        alert("Email đã tồn tại");
+        return;
+      } else if (data.errCode === 0) {
+        alert("Thêm thành công");
+
+        // Cập nhật list FE
+        setUsers((prev) => [
+          ...prev,
+          data.user || {
+            id: Date.now(),
             firstName: form.firstName,
             lastName: form.lastName,
             email: form.email,
+            address: form.address,
+            phone: form.phone,
+            gender: form.gender,
+            roleid: form.role,
             password: form.password,
-            address: form.address,
-            phoneNumber: form.phone,
-            gender: form.gender,
-            roleid: form.role,
-          }),
-        });
-
-        const data = await res.json();
-        console.log("Response từ server (create):", data);
-
-        if (data.errCode === 1) {
-          alert("Email đã tồn tại");
-          return;
-        }
-
-        if (data.errCode === 0) {
-          alert("Thêm thành công");
-
-          // cập nhật list trên FE
-          setUsers((prev) => [
-            ...prev,
-            data.user || {
-              id: Date.now(),
-              firstName: form.firstName,
-              lastName: form.lastName,
-              email: form.email,
-              address: form.address,
-              phonenumber: form.phone,
-              gender: form.gender,
-              roleid: form.role,
-              password: form.password,
-            },
-          ]);
-
-          closeAdd();
-          setEditUserId(null);
-        }
-      } catch (err) {
-        console.error("Lỗi khi gọi API:", err);
-        alert("Thêm thất bại");
-      }
-    } else {
-      // =============== CẬP NHẬT (SỬA) ===============
-      try {
-        const res = await fetch("http://localhost:3000/api/edit-user", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            id: editUserId, // gửi ID user lên backend
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            address: form.address,
-            phoneNumber: form.phone,
-            gender: form.gender,
-            roleid: form.role,
-          }),
-        });
+        ]);
 
-        const data = await res.json();
-        console.log("Response từ server (edit):", data);
-
-        if (data.errCode !== 0) {
-          alert(data.errMessage || "Cập nhật thất bại");
-          return;
-        }
-
-        alert("Cập nhật thành công");
-
-        // Cập nhật FE list
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === editUserId
-              ? {
-                  ...u,
-                  firstName: form.firstName,
-                  lastName: form.lastName,
-                  email: form.email,
-                  address: form.address,
-                  phonenumber: form.phone,
-                  gender: form.gender,
-                  roleid: form.role,
-                }
-              : u
-          )
-        );
-
+        // Reset form
         closeAdd();
-        setEditUserId(null); // reset về mode thêm mới
-      } catch (error) {
-        console.error("Lỗi khi edit user:", error);
-        alert("Có lỗi xảy ra khi cập nhật user");
+        setEditUserId(null);
+      } else {
+        // Nếu server trả về errCode khác 0,1 → log để debug
+        console.warn("Thêm thất bại, server trả:", data);
+        alert(data.errMessage || "Thêm thất bại");
       }
+    } catch (err) {
+      console.error("Lỗi khi gọi API:", err);
+      alert("Thêm thất bại do lỗi server");
     }
-  };
+  } else {
+    // === Sửa user ===
+    try {
+      const res = await fetch("http://localhost:3000/api/edit-user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editUserId,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          address: form.address,
+          phone: form.phone,
+          gender: form.gender,
+          roleid: form.role,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Response từ server (edit):", data);
+
+      if (data.errCode !== 0) {
+        alert(data.errMessage || "Cập nhật thất bại");
+        return;
+      }
+
+      alert("Cập nhật thành công");
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === editUserId
+            ? {
+                ...u,
+                firstName: form.firstName,
+                lastName: form.lastName,
+                email: form.email,
+                address: form.address,
+                phone: form.phone,
+                gender: form.gender,
+                roleid: form.role,
+              }
+            : u
+        )
+      );
+
+      closeAdd();
+      setEditUserId(null);
+    } catch (err) {
+      console.error("Lỗi khi edit user:", err);
+      alert("Cập nhật thất bại do lỗi server");
+    }
+  }
+};
+
 
   return (
     <div className="dash-page">

@@ -229,7 +229,7 @@ const Dashboard = () => {
                 <i className="fa-solid fa-chevron-right" />
               </button>
 
-              <button className="dash-module-item">
+              <button className="dash-module-item" onClick={() => navigate("/qltour")} >
                 <span>
                   <i className="fa-solid fa-route" />
                   Quản lí tour
