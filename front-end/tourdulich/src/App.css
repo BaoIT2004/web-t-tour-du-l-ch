@@ -2905,3 +2905,7 @@ input[type="password"]:focus {
   background-color: #fff;
 }
 
+#form-wrapper {
+  max-height: 100%; /* hoặc unset */
+  overflow: auto;   /* để scroll khi quá dài */
+}

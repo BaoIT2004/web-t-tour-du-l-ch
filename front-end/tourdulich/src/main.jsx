@@ -34,6 +34,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/qluser" element={<Qluser />} />
         <Route path="/qltour" element={<Qltour />} />
+        <Route path="/qltour/id" element={<Qltour />} />
         <Route path="/dattour/:id" element={<Dattour />} />
         <Route path="/thanhtoan" element={<Thanhtoan />} />
       </Routes>
