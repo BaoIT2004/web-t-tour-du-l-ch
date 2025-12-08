@@ -9,10 +9,14 @@ module.exports = {
                 autoIncrement: true,
                 primaryKey: true
             },
+            tourId: {
+                type: Sequelize.INTEGER,
+                allowNull: false
+            },
             comment: {
                 type: Sequelize.TEXT
             },
-            reviewDate: {                   
+            reviewDate: {
                 type: Sequelize.DATEONLY,
                 allowNull: false,
                 defaultValue: Sequelize.NOW

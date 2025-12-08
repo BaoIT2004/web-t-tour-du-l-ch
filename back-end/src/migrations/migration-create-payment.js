@@ -9,6 +9,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      bookingId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       totalPrice: {
         type: Sequelize.FLOAT
       },

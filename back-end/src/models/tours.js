@@ -10,9 +10,24 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'tourId',
                 as: 'schedules'
             });
+            // 1 Tour có nhiều booking
+            Tours.hasMany(models.Booking, {
+                foreignKey: 'tourId',
+                as: 'bookings'
+            });
+            // 1 Tours có nhiều đánh giá
+            Tours.hasMany(models.Review, {
+                foreignKey: 'tourId',
+                as: 'reviews'
+            });
         }
     }
     Tours.init({
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         tourName: DataTypes.STRING,
         tourPrice: DataTypes.FLOAT,
         description: DataTypes.TEXT,

@@ -9,11 +9,13 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            adminid: {
-                type: Sequelize.INTEGER
+            userId: {           // sửa từ customerid
+                type: Sequelize.INTEGER,
+                allowNull: false
             },
-            customerid: {
-                type: Sequelize.INTEGER
+            tourId: {           // thêm cột tourId
+                type: Sequelize.INTEGER,
+                allowNull: false
             },
             bookingDate: {
                 type: Sequelize.DATE
@@ -45,6 +47,7 @@ module.exports = {
                 type: Sequelize.DATE
             }
         });
+
     },
     async down(queryInterface, Sequelize) {
         await queryInterface.dropTable('Booking');

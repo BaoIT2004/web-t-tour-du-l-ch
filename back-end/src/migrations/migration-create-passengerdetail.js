@@ -10,6 +10,10 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
+            bookingId: {
+                type: Sequelize.INTEGER,
+                allowNull: false
+            },
             fullName: {
                 type: Sequelize.STRING,
             },

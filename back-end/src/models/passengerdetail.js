@@ -4,15 +4,18 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class PassengerDetail extends Model {
         static associate(models) {
-            // FK tới bảng Đặt tour
-            // PassengerDetail.belongsTo(models.Booking, {
-            //     foreignKey: 'bookingId',
-            //     targetKey: 'id'
-            // });
+            PassengerDetail.belongsTo(models.Booking, {
+                foreignKey: 'bookingId',
+                as: 'booking'
+            });
         }
     }
 
     PassengerDetail.init({
+        bookingId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
         fullName: DataTypes.STRING,      // Họ tên
         birthDate: DataTypes.DATEONLY,   // Ngày sinh
         gender: DataTypes.STRING,        // Giới tính

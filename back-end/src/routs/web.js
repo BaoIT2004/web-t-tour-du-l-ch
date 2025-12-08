@@ -2,6 +2,7 @@ import express from "express";
 import homeController from "../controller/homeController";
 import userController from "../controller/userController";
 import tourController from "../controller/tourController";
+import bookingController from "../controller/bookingController";
 import upload from "../config/multerConfig.js";
 
 const router = express.Router();  // định nghĩa routerr riêng biệt cho một phần của ứng dụng 
@@ -26,7 +27,7 @@ const initWebRoutes = (app) => {
     router.get('/api/count', userController.handleCount)  // Dasboard đếm số người dùng
 
 
-       //----------------- API TOUR -------------------------------------------
+    //----------------- API TOUR -------------------------------------------
 
     router.post('/api/creat-new-tour', upload.single('image'), tourController.handlNewtour);
     router.get('/api/view-new-tour', tourController.handleGetAlltoure); // xem
@@ -34,7 +35,10 @@ const initWebRoutes = (app) => {
     router.put('/api/update-tour', tourController.handleUpdateToure); // sửa
     router.put('/api/update-tour-image',   upload.single('image'),  tourController.handleUpdateImageToure); // sửa
     router.delete('/api/delete-tour', tourController.handleDelete);
- 
+    
+    //----------------- API booking -------------------------------------------
+
+    router.post('/api/creat-new-booking',  bookingController.handlNewBookingtour);
  
 
 
