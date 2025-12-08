@@ -146,7 +146,7 @@ let updateTourData = async (data, file) => {
 
         return {
             errCode: 0,
-            errMessage: 'Cập nhật tour thành công kèm lịch trình!',
+            errMessage: 'Cập nhật tour thành công',
             tour: result
         };
     } catch (err) {
