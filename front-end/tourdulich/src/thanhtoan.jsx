@@ -147,7 +147,7 @@ export default function PaymentPage() {
 
             <div className="pay-submit-row">
               <button className="pay-submit-btn" type="button">
-                Thanh toán
+                Đặt ngay
               </button>
             </div>
           </div>

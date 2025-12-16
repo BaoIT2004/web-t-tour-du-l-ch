@@ -7,6 +7,13 @@
     const [password, setPassword] = useState("");
     const [remember, setRemember] = useState(false);
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+
+
+    if (user && token) {
+      console.log("User ID:", user.id);
+    }
 
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -23,20 +30,35 @@
         });
         const data = await res.json();  //Lấy dữ liệu JSON mà server trả về → chuyển thành object JavaScript.
         console.log("Response từ server:", data);
+
+      if (data.errCode !== 0) {
+        alert(data.message);
+        return;
+      }
+
+        // LƯU TOKEN ĐÚNG
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify({
+          token: data.token,
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role
+        }));
+
+        console.log("TOKEN LƯU:", localStorage.getItem("token"));
+
         if (data.user.role === "2") {
-          //Lưu thông tin user
-          localStorage.setItem("user", JSON.stringify({
-            email: data.user.email
-          }));
           navigate("/"); 
         }else{
           navigate("/dashboard")
         }
+
       } catch (err) {
         console.error("Lỗi khi gọi API:", err);
         alert("Đăng nhập thất bại");
       }
     };
+
 
     return (
       <div className="login-page">
@@ -82,7 +104,9 @@
             <button type="submit" className="login-btn">
               Login
             </button>
-            <button type="button" className="signup-btn">
+            <button type="button" className="signup-btn"
+              onClick={() => navigate("/signup")}
+            >
               Signup
             </button>
           </form>

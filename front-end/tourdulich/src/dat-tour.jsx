@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext.jsx";
 import "./app.css";
-import { useParams } from "react-router-dom";
 
 /* ============ HEADER ============ */
 function Header() {
@@ -9,20 +10,12 @@ function Header() {
       <div className="hp-brand">
         <a
           href="/home"
-          style={{
-            textDecoration: "none",
-            color: "inherit",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
+          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: "10px" }}
         >
           <span className="hp-logo"></span>
           <span>BTQQ Travel</span>
         </a>
-        <span className="hp-brand-sub"></span>
       </div>
-
       <nav className="hp-nav">
         <a href="/flights">Flights</a>
         <a href="/hotels">Hotels</a>
@@ -30,25 +23,22 @@ function Header() {
         <a href="/cars">Cars</a>
         <a href="/blogs">Blogs</a>
       </nav>
-
-      <div>
-        <CustomerMenu />
-      </div>
+      <CustomerMenu />
     </header>
   );
 }
 
 function CustomerMenu() {
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef(null);
+  const [open, setOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+   const navigate = useNavigate();
+  const ref = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onDoc = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
-    const onEsc = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
+    const onEsc = (e) => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("click", onDoc);
     document.addEventListener("keydown", onEsc);
     return () => {
@@ -56,6 +46,13 @@ function CustomerMenu() {
       document.removeEventListener("keydown", onEsc);
     };
   }, []);
+
+
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+  };
 
   return (
     <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
@@ -65,52 +62,76 @@ function CustomerMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        Customer ▾
+        {user && user.email ? `${user.email} ▾` : "Customer ▾"}
       </button>
+
       <div className="hp-dd-menu" role="menu">
-        <a className="hp-dd-item" href="/login" role="menuitem">
-          Login
-        </a>
-        <a className="hp-dd-item" href="/signup" role="menuitem">
-          Signup
-        </a>
+        {!user ? (
+          <>
+            <a className="hp-dd-item" href="/login" role="menuitem">
+              Login
+            </a>
+            <a className="hp-dd-item" href="/signup" role="menuitem">
+              Signup
+            </a>
+          </>
+        ) : (
+          <>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-/* ============ COMPONENT 1: HERO TOUR ============ */
-function TourHero({ tour }) {
-  if (!tour) return null;
+/* ============ TOUR HERO ============ */
+function TourHero({ tour, startDate, setStartDate }) {
+  const [date, setDate] = useState(startDate);
+  const [adult, setAdult] = useState("");
+  const [child, setChild] = useState("");
+  const { user, token } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const [date, setDate] = React.useState("");
-  const [adult, setAdult] = React.useState("");
-  const [child, setChild] = React.useState("");
+  console.log("User trong TourHero:", user);
 
   const basePrice = tour.tourPrice || 300000;
   const childPrice = basePrice * 0.5;
   const totalPrice = adult * basePrice + child * childPrice;
+  const people = Number(adult) + Number(child);
   const image = tour.image ? `http://localhost:3000${tour.image}` : "";
 
-  const formatVND = (value) =>
-    value.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
+  const formatVND = (value) => value.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
 
+  const handleBooking = () => {
+    const currentToken = localStorage.getItem("token");
+
+    console.log(currentToken); // Debug
+
+    if (!currentToken || currentToken === "null" || currentToken === "undefined") {
+      alert("Bạn cần đăng nhập để đặt tour!");
+      navigate("/login");
+      return;
+    }
+
+    navigate(`/thanhtoan?total=${totalPrice}&people=${people}`);
+  };
   return (
     <section className="tt-main">
       <div className="hp-container">
         <div className="tt-hero-box">
           <div className="tt-hero-grid">
             <div className="tt-hero-image">
-              <img src={image} alt={tour.title} />
+              <img src={image} alt={tour.tourName} />
             </div>
-
             <div className="tt-hero-form">
               <h2 className="tt-hero-title">{tour.tourName}</h2>
+
               <div className="tt-form-group tt-price-row">
                 <label>Giá tour</label>
-                <div className="tt-price-text">
-                  {formatVND(basePrice)} VND / người
-                </div>
+                <div className="tt-price-text">{formatVND(basePrice)} VND / người</div>
               </div>
 
               <div className="tt-form-group">
@@ -119,7 +140,10 @@ function TourHero({ tour }) {
                   type="date"
                   className="tt-input"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setStartDate(e.target.value);
+                  }}
                 />
               </div>
 
@@ -133,13 +157,10 @@ function TourHero({ tour }) {
                   value={adult}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || /^[0-9]+$/.test(val)) {
-                      setAdult(val);
-                    }
+                    if (val === "" || /^[0-9]+$/.test(val)) setAdult(val);
                   }}
                   placeholder="Nhập số người"
                 />
-
               </div>
 
               <div className="tt-form-group">
@@ -152,13 +173,10 @@ function TourHero({ tour }) {
                   value={child}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || /^[0-9]+$/.test(val)) {
-                      setChild(val);
-                    }
+                    if (val === "" || /^[0-9]+$/.test(val)) setChild(val);
                   }}
                   placeholder="Nhập số người"
                 />
-
               </div>
 
               <div className="tt-form-group">
@@ -169,76 +187,65 @@ function TourHero({ tour }) {
                 </div>
               </div>
 
-              <a
-                href={`/thanhtoan?total=${totalPrice}&people=${adult + child}`}
-                className="ht-btn-outline"
-              >
+              <button className="ht-btn-outline" onClick={handleBooking}>
                 Đặt ngay
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </div>
     </section>
   );
-} /* ============ COMPONENT 2: NAME SCHEDULE ============ */
+}
 
+/* ============ TOUR SCHEDULE ============ */
+function TourSchedule({ tour, startDate }) {
+  const schedules = tour.schedules?.length
+    ? tour.schedules
+    : [{ schedule: "", startDate: "", endDate: "", note: "", status: "1" }];
 
-
-
-
-
-/* ============ COMPONENT 3: TOUR SCHEDULE ============ */
-function TourSchedule({ tour }) {
-  const [openList, setOpenList] = React.useState([1]);
-  const toggle = (id) =>
-    setOpenList((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-
-  const steps = tour.steps || [
-    { id: 1, title: "Hành trình ngày 1", content: "Tham quan A, B, C..." },
-    { id: 2, title: "Hành trình ngày 2", content: "Khám phá văn hóa..." },
-  ];
+  const start = startDate ? new Date(startDate) : null;
 
   return (
     <section>
       <div className="hp-container">
         <div className="tt-section-box">
           <div className="tt-section-header">Tiến trình tour</div>
-          <form className="tt-step-form">
-            <textarea
-              className="tt-step-input"
-              placeholder="Hiển thị nội dung lịch trình tour ở đây..."
-              rows={1}
-              onInput={(e) => {
-                e.target.style.height = "auto";
-                e.target.style.height = e.target.scrollHeight + "px";
-              }}
-              readOnly
-            />
-          </form>
+          {schedules.map((item, index) => {
+            const itemStartDate = start ? new Date(start) : new Date(item.startDate);
+            if (start) itemStartDate.setDate(itemStartDate.getDate() + index);
+            const itemEndDate = new Date(itemStartDate);
+            itemEndDate.setDate(itemEndDate.getDate() + 1);
+
+            return (
+              <div key={index} className="day-item" style={{ border: "1px solid #ddd", padding: 12, marginBottom: 12, borderRadius: 6 }}>
+                <strong>Ngày {index + 1}</strong>
+                <label className="dash-form-label">Lịch trình tour</label>
+                <textarea className="dash-input dash-w100" rows={4} placeholder="Không có dữ liệu" value={item.itinerary || ""} readOnly />
+                <label className="dash-form-label" style={{ marginTop: 10 }}>Ghi chú</label>
+                <textarea className="dash-input dash-w100" rows={2} placeholder="Không có ghi chú" value={item.notes || ""} readOnly />
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
-
   );
 }
 
-
-
-/* ============ COMPONENT 3: TOUR REVIEWS ============ */
+/* ============ TOUR REVIEWS ============ */
 function TourReviews({ tour }) {
-  const [reviews, setReviews] = React.useState(tour.reviews || []);
-  const [showForm, setShowForm] = React.useState(false);
-  const [rating, setRating] = React.useState(0);
-  const [date, setDate] = React.useState("");
-  const [content, setContent] = React.useState("");
+  const [reviews, setReviews] = useState(tour.reviews || []);
+  const [showForm, setShowForm] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [date, setDate] = useState("");
+  const [content, setContent] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!rating || !date || !content.trim()) return alert("Vui lòng nhập đầy đủ thông tin!");
-
     const newReview = { id: Date.now(), name: "Khách hàng", rating, content, date };
-    setReviews((prev) => [newReview, ...prev]);
+    setReviews(prev => [newReview, ...prev]);
     setRating(0); setDate(""); setContent(""); setShowForm(false);
   };
 
@@ -247,50 +254,39 @@ function TourReviews({ tour }) {
       <div className="hp-container">
         <div className="tt-section-box">
           <div className="tt-section-header">Đánh giá</div>
-          <div className="tt-reviews-card">
-            {reviews.map((rv) => (
-              <div key={rv.id} className="tt-review-item">
-                <div className="tt-review-avatar">☺</div>
-                <div className="tt-review-body">
-                  <div className="tt-review-header">
-                    <strong>{rv.name}</strong>
-                    <span className="tt-review-date">Ngày đánh giá: {rv.date}</span>
-                  </div>
-                  <div className="tt-review-stars">
-                    {"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}
-                  </div>
-                  <p>{rv.content}</p>
-                </div>
+          {reviews.map(rv => (
+            <div key={rv.id} className="tt-review-item">
+              <div className="tt-review-avatar">☺</div>
+              <div className="tt-review-body">
+                <strong>{rv.name}</strong>
+                <span className="tt-review-date">Ngày đánh giá: {rv.date}</span>
+                <div className="tt-review-stars">{"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}</div>
+                <p>{rv.content}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
           <button className="tt-btn-light" onClick={() => setShowForm(true)}>+ Thêm đánh giá</button>
         </div>
       </div>
 
       {showForm && (
         <div className="tt-review-backdrop" onClick={() => setShowForm(false)}>
-          <div className="tt-review-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="tt-review-modal" onClick={e => e.stopPropagation()}>
             <h3 className="tt-review-modal-title">Form đánh giá</h3>
-            <form className="tt-review-form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <label>Đánh giá sao (1–5):</label>
-              <div className="tt-review-stars-input">
-                {[1,2,3,4,5].map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className={s <= rating ? "tt-star-btn tt-star-btn-active" : "tt-star-btn"}
-                    onClick={() => setRating(s)}
-                  >★</button>
+              <div>
+                {[1,2,3,4,5].map(s => (
+                  <button key={s} type="button" className={s <= rating ? "tt-star-btn tt-star-btn-active" : "tt-star-btn"} onClick={() => setRating(s)}>★</button>
                 ))}
               </div>
               <label>Ngày đánh giá</label>
-              <input type="date" className="tt-review-input" value={date} onChange={(e) => setDate(e.target.value)} />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
               <label>Nội dung</label>
-              <textarea className="tt-review-textarea" value={content} onChange={(e) => setContent(e.target.value)} />
-              <div className="tt-review-actions">
-                <button type="button" className="tt-btn-light" onClick={() => setShowForm(false)}>Đóng</button>
-                <button type="submit" className="tt-btn-primary">Gửi</button>
+              <textarea value={content} onChange={e => setContent(e.target.value)} />
+              <div>
+                <button type="button" onClick={() => setShowForm(false)}>Đóng</button>
+                <button type="submit">Gửi</button>
               </div>
             </form>
           </div>
@@ -305,67 +301,51 @@ function Footer() {
   return (
     <footer className="hp-footer">
       <div className="hp-container hp-footer-inner">
-        <div className="hp-footer-col">
+        <div>
           <h3>BTQQ Travel</h3>
           <p>Your trusted partner for flights, hotels, tours and cars.</p>
         </div>
-        <div className="hp-footer-col">
-          <h4>Quick Links</h4>
-          <ul>
-            <li><a href="#">Flights</a></li>
-            <li><a href="#">Hotels</a></li>
-            <li><a href="#">Tours</a></li>
-            <li><a href="#">Cars</a></li>
-          </ul>
-        </div>
-        <div className="hp-footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Booking Guide</a></li>
-          </ul>
-        </div>
-        <div className="hp-footer-col">
-          <h4>Follow Us</h4>
-          <div className="hp-footer-social">
-            <a href="#">🌐</a>
-            <a href="#">📘</a>
-            <a href="#">📸</a>
-            <a href="#">🎵</a>
-          </div>
-        </div>
       </div>
-      <div className="hp-footer-bottom">
-        © {new Date().getFullYear()} BTQQ Travel — All rights reserved.
-      </div>
+      <div className="hp-footer-bottom">© {new Date().getFullYear()} BTQQ Travel — All rights reserved.</div>
     </footer>
   );
 }
 
-/* ============ PAGE EXPORT ============ */
+/* ============ MAIN PAGE: TOUR DETAIL ============ */
 export default function TourDetail() {
   const { id } = useParams();
-  const [tour, setTour] = React.useState(null);
+  const [tour, setTour] = useState(null);
+  const [startDate, setStartDate] = useState("");
 
-  React.useEffect(() => {
-    fetch("http://localhost:3000/api/view-new-tour")
-      .then(res => res.json())
-      .then(data => {
-        const tours = Array.isArray(data.tours) ? data.tours : [];
-        const selectedTour = tours.find(t => t.id === Number(id));
-        setTour(selectedTour || null);
-      })
-      .catch(err => console.log("Lỗi fetch tour:", err));
-  }, [id]);
+  useEffect(() => {
+    const fetchTour = () => {
+      fetch(`http://localhost:3000/api/view-tour?id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.errCode === 0) {
+            setTour(data.tour);
+            if (!startDate && data.tour.schedules?.length > 0) {
+              setStartDate(data.tour.schedules[0].startDate.slice(0,10));
+            }
+          }
+        })
+        .catch(err => console.log("Lỗi fetch tour:", err));
+    };
+
+    fetchTour();
+
+    const onTourUpdated = () => fetchTour();
+    window.addEventListener("tourUpdated", onTourUpdated);
+    return () => window.removeEventListener("tourUpdated", onTourUpdated);
+  }, [id, startDate]);
 
   if (!tour) return <div>Đang tải tour...</div>;
 
   return (
     <div className="home-page">
       <Header />
-      <TourHero tour={tour} />
-      <TourSchedule tour={tour} />
+      <TourHero tour={tour} startDate={startDate} setStartDate={setStartDate} />
+      <TourSchedule tour={tour} startDate={startDate} />
       <TourReviews tour={tour} />
       <Footer />
     </div>

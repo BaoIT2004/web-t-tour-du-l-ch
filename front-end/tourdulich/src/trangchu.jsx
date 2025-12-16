@@ -1,9 +1,11 @@
-import * as React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { AuthContext } from "./AuthContext.jsx";
 import "./app.css";
 
-/* ================== CONSTANTS ================== */
+/* ============================================================
+   CONSTANTS & DATA
+============================================================ */
 
 const TABS = ["Flights", "Hotels", "Tours", "Cars"];
 
@@ -26,7 +28,7 @@ const HOTELS = [
     img: "https://phptravels.net/uploads/184028-28-01-2023-1674874284.jpg",
   },
   {
-    title: "Four Points  Bur Dubai",
+    title: "Four Points Bur Dubai",
     city: "Dubai",
     country: "United Arab Emirates",
     price: 260,
@@ -64,9 +66,50 @@ const TRANSFER_CARS = [
   },
 ];
 
-/* ================== COMPONENTS ================== */
+// =================UTILITY FUNCTIONS =========================
 
-/* -------- Header -------- */
+const getTodayDate = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
+
+const getTomorrowDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
+
+
+
+/* ============================================================
+   HEADER COMPONENTS
+============================================================ */
+const handleLogin = async (e) => {
+  e.preventDefault();
+  const res = await fetch("http://localhost:3000/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+
+  if (data.user) {
+    // Lưu user và token vào localStorage
+    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token); // nếu cần token
+
+    // Chuyển hướng về trang chủ
+    window.location.href = "/home";
+  } else {
+    alert("Login failed");
+  }
+};
+
 
 function Header() {
   return (
@@ -103,34 +146,39 @@ function Header() {
   );
 }
 
-/* -------- Dropdown Customer -------- */
+
 
 function CustomerMenu() {
-  const [open, setOpen] = React.useState(false);
-  const [user, setUser] = React.useState(null);
-  const ref = React.useRef(null);
-
+  const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const ref = useRef(null);
+  
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
     window.location.href = "/login";
   };
 
-  // LẤY USER TỪ LOCALSTORAGE
-  React.useEffect(() => {
+  useEffect(() => {
     const saved = localStorage.getItem("user");
-    if (saved) {
+    const storedToken = localStorage.getItem("token");
+    if (saved && storedToken) {
       try {
         const parsed = JSON.parse(saved);
         setUser(parsed);
+        setToken(storedToken);
+        console.log("người dùng đã tải:", parsed); // Debug
+        console.log("Token loaded:", storedToken); // Debug
       } catch (e) {
         console.log("Parse user failed:", e);
         setUser(null);
+        setToken(null);
       }
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onDoc = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
@@ -178,101 +226,69 @@ function CustomerMenu() {
   );
 }
 
-/* -------- Hero + Tabs + Search -------- */
+/* ============================================================
+   HERO & SEARCH SECTION
+============================================================ */
 
 function HeroSearch() {
-  const [activeTab, setActiveTab] = React.useState("Flights");
+  const [activeTab, setActiveTab] = useState("Flights");
 
-  /* ========== STATE CHO FLIGHTS ========== */
-  const [tripType, setTripType] = React.useState("oneway");
-  const [cabin, setCabin] = React.useState("economy");
-  const [from, setFrom] = React.useState("");
-  const [to, setTo] = React.useState("");
-  const [date, setDate] = React.useState(() => {
-    const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
-  const [travellers, setTravellers] = React.useState(1);
+  // Flight states
+  const [tripType, setTripType] = useState("oneway");
+  const [cabin, setCabin] = useState("economy");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState(getTodayDate);
+  const [travellers, setTravellers] = useState(1);
+
+  // Hotel states
+  const [hotelLocation, setHotelLocation] = useState("");
+  const [hotelCheckin, setHotelCheckin] = useState(getTodayDate);
+  const [hotelCheckout, setHotelCheckout] = useState(getTomorrowDate);
+  const [hotelRooms, setHotelRooms] = useState(1);
+  const [hotelTravellers, setHotelTravellers] = useState(2);
+  const [openGuests, setOpenGuests] = useState(false);
+
+  // Tour states
+  const [tourLocation, setTourLocation] = useState("");
+  const [tourDate, setTourDate] = useState(getTodayDate);
+  const [tourTravellers, setTourTravellers] = useState(1);
+  const [openTourGuests, setOpenTourGuests] = useState(false);
+
+  // Car states
+  const [carLocation, setCarLocation] = useState("");
+  const [carPickup, setCarPickup] = useState(getTodayDate);
+  const [carDropoff, setCarDropoff] = useState(getTomorrowDate);
+  const [carTravellers, setCarTravellers] = useState(1);
+  const [openCarGuests, setOpenCarGuests] = useState(false);
+
+  // Refs
+  const hotelGuestsRef = useRef(null);
+  const tourGuestsRef = useRef(null);
+  const carGuestsRef = useRef(null);
 
   const swap = () => {
     setFrom(to);
     setTo(from);
   };
 
-  /* ========== STATE CHO HOTELS ========== */
-  const [hotelLocation, setHotelLocation] = React.useState("");
-  const [hotelCheckin, setHotelCheckin] = React.useState(() => {
-    const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
-  const [hotelCheckout, setHotelCheckout] = React.useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
+  const changeHotelGuest = (type, delta) => {
+    if (type === "rooms") {
+      setHotelRooms((v) => Math.max(1, v + delta));
+    } else if (type === "travellers") {
+      setHotelTravellers((v) => Math.max(1, v + delta));
+    }
+  };
 
-  const [hotelRooms, setHotelRooms] = React.useState(1);
-  const [hotelTravellers, setHotelTravellers] = React.useState(2);
-  const [openGuests, setOpenGuests] = React.useState(false);
-
-  /* ========== STATE CHO TOURS ========== */
-  const [tourLocation, setTourLocation] = React.useState("");
-  const [tourDate, setTourDate] = React.useState(() => {
-    const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
-  const [tourTravellers, setTourTravellers] = React.useState(1);
-  const [openTourGuests, setOpenTourGuests] = React.useState(false);
-
-  /* ========== STATE CHO CARS ========== */
-  const [carLocation, setCarLocation] = React.useState("");
-  const [carPickup, setCarPickup] = React.useState(() => {
-    const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
-  const [carDropoff, setCarDropoff] = React.useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${d.getFullYear()}-${mm}-${dd}`;
-  });
-  const [carTravellers, setCarTravellers] = React.useState(1);
-  const [openCarGuests, setOpenCarGuests] = React.useState(false);
-
-  /* ========== REF ĐỂ BẮT CLICK RA NGOÀI (đóng popover) ========== */
-  const hotelGuestsRef = React.useRef(null);
-  const tourGuestsRef = React.useRef(null);
-  const carGuestsRef = React.useRef(null);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        hotelGuestsRef.current &&
-        !hotelGuestsRef.current.contains(e.target)
-      ) {
+      if (hotelGuestsRef.current && !hotelGuestsRef.current.contains(e.target)) {
         setOpenGuests(false);
       }
-      if (
-        tourGuestsRef.current &&
-        !tourGuestsRef.current.contains(e.target)
-      ) {
+      if (tourGuestsRef.current && !tourGuestsRef.current.contains(e.target)) {
         setOpenTourGuests(false);
       }
-      if (
-        carGuestsRef.current &&
-        !carGuestsRef.current.contains(e.target)
-      ) {
+      if (carGuestsRef.current && !carGuestsRef.current.contains(e.target)) {
         setOpenCarGuests(false);
       }
     };
@@ -282,14 +298,6 @@ function HeroSearch() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const changeHotelGuest = (type, delta) => {
-    if (type === "rooms") {
-      setHotelRooms((v) => Math.max(1, v + delta));
-    } else if (type === "travellers") {
-      setHotelTravellers((v) => Math.max(1, v + delta));
-    }
-  };
 
   return (
     <section className="hp-hero">
@@ -313,327 +321,69 @@ function HeroSearch() {
         </div>
 
         <div className="hp-search">
-          {/* =============== FLIGHTS =============== */}
           {activeTab === "Flights" && (
-            <>
-              <div className="hp-search-top">
-                <div className="hp-chip">
-                  <span></span>
-                  <select
-                    value={tripType}
-                    onChange={(e) => setTripType(e.target.value)}
-                  >
-                    <option value="oneway">One Way</option>
-                    <option value="round">Round Trip</option>
-                  </select>
-                </div>
-                <div className="hp-chip">
-                  <span></span>
-                  <select
-                    value={cabin}
-                    onChange={(e) => setCabin(e.target.value)}
-                  >
-                    <option value="economy">Economy</option>
-                    <option value="premium">Premium Economy</option>
-                    <option value="business">Business</option>
-                    <option value="first">First</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="hp-grid">
-                <label className="hp-field">
-                  <span></span>
-                  <input
-                    placeholder="Flying From"
-                    value={from}
-                    onChange={(e) => setFrom(e.target.value)}
-                  />
-                </label>
-
-                <button className="hp-swap" onClick={swap} title="Swap">
-                  ⇄
-                </button>
-
-                <label className="hp-field">
-                  <span></span>
-                  <input
-                    placeholder="Destination To"
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                  />
-                </label>
-
-                <label className="hp-field">
-                  <span></span>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                  />
-                </label>
-
-                <label className="hp-field hp-inline">
-                  <span>Hành khách</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={travellers}
-                    onChange={(e) =>
-                      setTravellers(Math.max(1, +e.target.value))
-                    }
-                  />
-                </label>
-
-                <button className="hp-search-btn">🔎</button>
-              </div>
-            </>
+            <FlightSearch
+              tripType={tripType}
+              setTripType={setTripType}
+              cabin={cabin}
+              setCabin={setCabin}
+              from={from}
+              setFrom={setFrom}
+              to={to}
+              setTo={setTo}
+              date={date}
+              setDate={setDate}
+              travellers={travellers}
+              setTravellers={setTravellers}
+              swap={swap}
+            />
           )}
 
-          {/* =============== HOTELS =============== */}
           {activeTab === "Hotels" && (
-            <div className="hp-grid-hotels">
-              <label className="hp-hotel-field hp-hotel-loc">
-                <input
-                  className="hp-hotel-input"
-                  placeholder="Where are you going?"
-                  value={hotelLocation}
-                  onChange={(e) => setHotelLocation(e.target.value)}
-                />
-              </label>
-
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkin</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={hotelCheckin}
-                    onChange={(e) => setHotelCheckin(e.target.value)}
-                  />
-                </div>
-              </label>
-
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Checkout</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={hotelCheckout}
-                    onChange={(e) => setHotelCheckout(e.target.value)}
-                  />
-                </div>
-              </label>
-
-              <label
-                ref={hotelGuestsRef}
-                className="hp-hotel-field hp-hotel-people"
-                onClick={() => setOpenGuests((v) => !v)}
-              >
-                <div className="hp-hotel-people-text">
-                  <span className="hp-hotel-label">Travellers</span>
-                  <strong>{hotelTravellers}</strong>
-                  <span className="hp-hotel-label rooms-label">Rooms</span>
-                  <strong>{hotelRooms}</strong>
-                </div>
-
-                <span className="hp-hotel-chevron">▾</span>
-
-                {openGuests && (
-                  <div
-                    className="hp-guests-popover"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Rooms</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          onClick={() => changeHotelGuest("rooms", -1)}
-                        >
-                          −
-                        </button>
-                        <span>{hotelRooms}</span>
-                        <button
-                          onClick={() => changeHotelGuest("rooms", 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Travellers</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          onClick={() =>
-                            changeHotelGuest("travellers", -1)
-                          }
-                        >
-                          −
-                        </button>
-                        <span>{hotelTravellers}</span>
-                        <button
-                          onClick={() =>
-                            changeHotelGuest("travellers", 1)
-                          }
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </label>
-
-              <button className="hp-search-btn">🔎</button>
-            </div>
+            <HotelSearch
+              hotelLocation={hotelLocation}
+              setHotelLocation={setHotelLocation}
+              hotelCheckin={hotelCheckin}
+              setHotelCheckin={setHotelCheckin}
+              hotelCheckout={hotelCheckout}
+              setHotelCheckout={setHotelCheckout}
+              hotelRooms={hotelRooms}
+              hotelTravellers={hotelTravellers}
+              openGuests={openGuests}
+              setOpenGuests={setOpenGuests}
+              changeHotelGuest={changeHotelGuest}
+              hotelGuestsRef={hotelGuestsRef}
+            />
           )}
 
-          {/* =============== TOURS =============== */}
           {activeTab === "Tours" && (
-            <div className="hp-grid-tours">
-              <label className="hp-hotel-field hp-tour-city">
-                <input
-                  className="hp-hotel-input"
-                  placeholder="Search your city"
-                  value={tourLocation}
-                  onChange={(e) => setTourLocation(e.target.value)}
-                />
-              </label>
-
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Date</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={tourDate}
-                    onChange={(e) => setTourDate(e.target.value)}
-                  />
-                </div>
-              </label>
-
-              <label
-                ref={tourGuestsRef}
-                className="hp-hotel-field hp-tour-people"
-                onClick={() => setOpenTourGuests((v) => !v)}
-              >
-                <span className="hp-hotel-icon">👥</span>
-                <div className="hp-tour-people-text">
-                  <span className="hp-tour-label-strong">Travellers</span>
-                  <span>&nbsp;{tourTravellers}</span>
-                </div>
-                <span className="hp-hotel-chevron">▾</span>
-
-                {openTourGuests && (
-                  <div
-                    className="hp-guests-popover"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Travellers</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          onClick={() =>
-                            setTourTravellers((v) => Math.max(1, v - 1))
-                          }
-                        >
-                          −
-                        </button>
-                        <span>{tourTravellers}</span>
-                        <button
-                          onClick={() => setTourTravellers((v) => v + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </label>
-
-              <button className="hp-search-btn">🔎</button>
-            </div>
+            <TourSearch
+              tourLocation={tourLocation}
+              setTourLocation={setTourLocation}
+              tourDate={tourDate}
+              setTourDate={setTourDate}
+              tourTravellers={tourTravellers}
+              setTourTravellers={setTourTravellers}
+              openTourGuests={openTourGuests}
+              setOpenTourGuests={setOpenTourGuests}
+              tourGuestsRef={tourGuestsRef}
+            />
           )}
 
-          {/* =============== CARS =============== */}
           {activeTab === "Cars" && (
-            <div className="hp-grid-cars">
-              <label className="hp-hotel-field">
-                <input
-                  className="hp-hotel-input"
-                  placeholder="Search your city"
-                  value={carLocation}
-                  onChange={(e) => setCarLocation(e.target.value)}
-                />
-              </label>
-
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Pick up date</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={carPickup}
-                    onChange={(e) => setCarPickup(e.target.value)}
-                  />
-                </div>
-              </label>
-
-              <label className="hp-hotel-field">
-                <div className="hp-hotel-text">
-                  <span className="hp-hotel-label">Drop off date</span>
-                  <input
-                    type="date"
-                    className="hp-hotel-date-input"
-                    value={carDropoff}
-                    onChange={(e) => setCarDropoff(e.target.value)}
-                  />
-                </div>
-              </label>
-
-              <label
-                ref={carGuestsRef}
-                className="hp-hotel-field hp-tour-people"
-                onClick={() => setOpenCarGuests((v) => !v)}
-              >
-                <span className="hp-hotel-icon">👥</span>
-                <div className="hp-tour-people-text">
-                  <span className="hp-tour-label-strong">Travellers</span>
-                  <span>&nbsp;{carTravellers}</span>
-                </div>
-                <span className="hp-hotel-chevron">▾</span>
-
-                {openCarGuests && (
-                  <div
-                    className="hp-guests-popover"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="hp-guest-row">
-                      <span className="hp-guest-label">Travellers</span>
-                      <div className="hp-guest-counter">
-                        <button
-                          onClick={() =>
-                            setCarTravellers((v) => Math.max(1, v - 1))
-                          }
-                        >
-                          −
-                        </button>
-                        <span>{carTravellers}</span>
-                        <button
-                          onClick={() => setCarTravellers((v) => v + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </label>
-
-              <button className="hp-search-btn">🔎</button>
-            </div>
+            <CarSearch
+              carLocation={carLocation}
+              setCarLocation={setCarLocation}
+              carPickup={carPickup}
+              setCarPickup={setCarPickup}
+              carDropoff={carDropoff}
+              setCarDropoff={setCarDropoff}
+              carTravellers={carTravellers}
+              setCarTravellers={setCarTravellers}
+              openCarGuests={openCarGuests}
+              setOpenCarGuests={setOpenCarGuests}
+              carGuestsRef={carGuestsRef}
+            />
           )}
         </div>
       </div>
@@ -641,7 +391,355 @@ function HeroSearch() {
   );
 }
 
-/* -------- Featured Flights -------- */
+/* ============================================================
+   SEARCH FORM COMPONENTS
+============================================================ */
+
+function FlightSearch({
+  tripType,
+  setTripType,
+  cabin,
+  setCabin,
+  from,
+  setFrom,
+  to,
+  setTo,
+  date,
+  setDate,
+  travellers,
+  setTravellers,
+  swap,
+}) {
+  return (
+    <>
+      <div className="hp-search-top">
+        <div className="hp-chip">
+          <span></span>
+          <select value={tripType} onChange={(e) => setTripType(e.target.value)}>
+            <option value="oneway">One Way</option>
+            <option value="round">Round Trip</option>
+          </select>
+        </div>
+        <div className="hp-chip">
+          <span></span>
+          <select value={cabin} onChange={(e) => setCabin(e.target.value)}>
+            <option value="economy">Economy</option>
+            <option value="premium">Premium Economy</option>
+            <option value="business">Business</option>
+            <option value="first">First</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="hp-grid">
+        <label className="hp-field">
+          <span></span>
+          <input
+            placeholder="Flying From"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+        </label>
+
+        <button className="hp-swap" onClick={swap} title="Swap">
+          ⇄
+        </button>
+
+        <label className="hp-field">
+          <span></span>
+          <input
+            placeholder="Destination To"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+        </label>
+
+        <label className="hp-field">
+          <span></span>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </label>
+
+        <label className="hp-field hp-inline">
+          <span>Hành khách</span>
+          <input
+            type="number"
+            min={1}
+            value={travellers}
+            onChange={(e) => setTravellers(Math.max(1, +e.target.value))}
+          />
+        </label>
+
+        <button className="hp-search-btn">🔎</button>
+      </div>
+    </>
+  );
+}
+
+function HotelSearch({
+  hotelLocation,
+  setHotelLocation,
+  hotelCheckin,
+  setHotelCheckin,
+  hotelCheckout,
+  setHotelCheckout,
+  hotelRooms,
+  hotelTravellers,
+  openGuests,
+  setOpenGuests,
+  changeHotelGuest,
+  hotelGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-hotels">
+      <label className="hp-hotel-field hp-hotel-loc">
+        <input
+          className="hp-hotel-input"
+          placeholder="Where are you going?"
+          value={hotelLocation}
+          onChange={(e) => setHotelLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Checkin</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={hotelCheckin}
+            onChange={(e) => setHotelCheckin(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Checkout</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={hotelCheckout}
+            onChange={(e) => setHotelCheckout(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={hotelGuestsRef}
+        className="hp-hotel-field hp-hotel-people"
+        onClick={() => setOpenGuests((v) => !v)}
+      >
+        <div className="hp-hotel-people-text">
+          <span className="hp-hotel-label">Travellers</span>
+          <strong>{hotelTravellers}</strong>
+          <span className="hp-hotel-label rooms-label">Rooms</span>
+          <strong>{hotelRooms}</strong>
+        </div>
+
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Rooms</span>
+              <div className="hp-guest-counter">
+                <button onClick={() => changeHotelGuest("rooms", -1)}>−</button>
+                <span>{hotelRooms}</span>
+                <button onClick={() => changeHotelGuest("rooms", 1)}>+</button>
+              </div>
+            </div>
+
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button onClick={() => changeHotelGuest("travellers", -1)}>
+                  −
+                </button>
+                <span>{hotelTravellers}</span>
+                <button onClick={() => changeHotelGuest("travellers", 1)}>
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+function TourSearch({
+  tourLocation,
+  setTourLocation,
+  tourDate,
+  setTourDate,
+  tourTravellers,
+  setTourTravellers,
+  openTourGuests,
+  setOpenTourGuests,
+  tourGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-tours">
+      <label className="hp-hotel-field hp-tour-city">
+        <input
+          className="hp-hotel-input"
+          placeholder="Search your city"
+          value={tourLocation}
+          onChange={(e) => setTourLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={tourDate}
+            onChange={(e) => setTourDate(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={tourGuestsRef}
+        className="hp-hotel-field hp-tour-people"
+        onClick={() => setOpenTourGuests((v) => !v)}
+      >
+        <span className="hp-hotel-icon">👥</span>
+        <div className="hp-tour-people-text">
+          <span className="hp-tour-label-strong">Travellers</span>
+          <span>&nbsp;{tourTravellers}</span>
+        </div>
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openTourGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button
+                  onClick={() => setTourTravellers((v) => Math.max(1, v - 1))}
+                >
+                  −
+                </button>
+                <span>{tourTravellers}</span>
+                <button onClick={() => setTourTravellers((v) => v + 1)}>
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+function CarSearch({
+  carLocation,
+  setCarLocation,
+  carPickup,
+  setCarPickup,
+  carDropoff,
+  setCarDropoff,
+  carTravellers,
+  setCarTravellers,
+  openCarGuests,
+  setOpenCarGuests,
+  carGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-cars">
+      <label className="hp-hotel-field">
+        <input
+          className="hp-hotel-input"
+          placeholder="Search your city"
+          value={carLocation}
+          onChange={(e) => setCarLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Pick up date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={carPickup}
+            onChange={(e) => setCarPickup(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Drop off date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={carDropoff}
+            onChange={(e) => setCarDropoff(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={carGuestsRef}
+        className="hp-hotel-field hp-tour-people"
+        onClick={() => setOpenCarGuests((v) => !v)}
+      >
+        <span className="hp-hotel-icon">👥</span>
+        <div className="hp-tour-people-text">
+          <span className="hp-tour-label-strong">Travellers</span>
+          <span>&nbsp;{carTravellers}</span>
+        </div>
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openCarGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button
+                  onClick={() => setCarTravellers((v) => Math.max(1, v - 1))}
+                >
+                  −
+                </button>
+                <span>{carTravellers}</span>
+                <button onClick={() => setCarTravellers((v) => v + 1)}>+</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+/* ============================================================
+   FEATURED SECTIONS
+============================================================ */
 
 function FeaturedFlights() {
   return (
@@ -656,9 +754,7 @@ function FeaturedFlights() {
                 <span>✈️</span>
               </div>
               <div className="hp-card-sub">{f.airline}</div>
-              <div className="hp-card-price">
-                From USD {f.price.toFixed(2)}
-              </div>
+              <div className="hp-card-price">From USD {f.price.toFixed(2)}</div>
             </div>
           ))}
         </div>
@@ -666,8 +762,6 @@ function FeaturedFlights() {
     </section>
   );
 }
-
-/* -------- Featured Hotels -------- */
 
 function FeaturedHotels() {
   return (
@@ -720,9 +814,7 @@ function FeaturedHotels() {
 
             <div className="hp-hotel-meta promo-meta">
               <h3 className="hp-hotel-title">Xem thêm nhiều khách sạn</h3>
-              <p className="promo-text">
-                rất nhiều khách sạn đang chờ bạn
-              </p>
+              <p className="promo-text">rất nhiều khách sạn đang chờ bạn</p>
 
               <a
                 href="/hotels"
@@ -738,13 +830,12 @@ function FeaturedHotels() {
     </section>
   );
 }
-/* -------- Popular Tours (dùng dữ liệu từ backend) -------- */
 
 function PopularTours() {
-  const navigate = useNavigate(); 
-  const [tours, setTours] = React.useState([]);
+  const navigate = useNavigate();
+  const [tours, setTours] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("http://localhost:3000/api/view-new-tour")
       .then((res) => res.json())
       .then((data) => {
@@ -754,7 +845,7 @@ function PopularTours() {
       .catch((err) => console.log("Lỗi fetch tours:", err));
   }, []);
 
-  const firstTour = tours[0]; // dùng cho card "Khám phá thêm tour"
+  const firstTour = tours[0];
 
   return (
     <section className="hp-tours">
@@ -764,7 +855,6 @@ function PopularTours() {
         </div>
 
         <div className="hp-tours-grid">
-          {/* CÁC TOUR TỪ BACKEND */}
           {tours.map((tour, i) => (
             <article
               key={tour.id || i}
@@ -798,7 +888,6 @@ function PopularTours() {
             </article>
           ))}
 
-          {/* CARD KHÁM PHÁ THÊM TOUR */}
           <article
             className="hp-tour-card"
             style={{
@@ -836,9 +925,6 @@ function PopularTours() {
     </section>
   );
 }
-
-
-/* -------- Recommended Cars -------- */
 
 function RecommendedCars() {
   return (
@@ -890,7 +976,9 @@ function RecommendedCars() {
   );
 }
 
-/* -------- Footer -------- */
+/* ============================================================
+   FOOTER
+============================================================ */
 
 function Footer() {
   return (
@@ -952,7 +1040,9 @@ function Footer() {
   );
 }
 
-/* ================== PAGE ROOT ================== */
+/* ============================================================
+   MAIN PAGE COMPONENT
+============================================================ */
 
 export default function TrangChu() {
   return (

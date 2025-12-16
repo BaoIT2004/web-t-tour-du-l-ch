@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect ,useRef } from "react";
-import { useSearchParams,useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 // ==========================
@@ -25,7 +25,7 @@ const EMPTY_FORM = {
 const Qltour = () => {
   // STATE
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [tours, setTours] = useState(INITIAL_TOURS);
   const [selectedTour, setSelectedTour] = useState(null); // lưu tour đang chọn
   const [query, setQuery] = useState("");
@@ -69,25 +69,25 @@ const Qltour = () => {
     fetchTours();
   }, []);
 
-const handleViewTourDetail = async (id) => {
-  console.log("ID tour:", id); // đây là ID tour bạn click
-  try {
-    const res = await fetch(`http://localhost:3000/api/view-tour?id=${id}`);
-    const data = await res.json();
-     console.log("API Response:", data);
+  const handleViewTourDetail = async (id) => {
+    console.log("ID tour:", id); // đây là ID tour bạn click
+    try {
+      const res = await fetch(`http://localhost:3000/api/view-tour?id=${id}`);
+      const data = await res.json();
+      console.log("API Response:", data);
 
-    if (data.errCode === 0) {
-      // Hiển thị chi tiết   tour
-      console.log("Tour detail:", data.tour);
-      openEdit(data.tour);
-    } else {
-      alert(data.errMessage || "Không tìm thấy tour");
+      if (data.errCode === 0) {
+        // Hiển thị chi tiết   tour
+        console.log("Tour detail:", data.tour);
+        openEdit(data.tour);
+      } else {
+        alert(data.errMessage || "Không tìm thấy tour");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi server!");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Lỗi server!");
-  }
-};
+  };
 
 
   // FILTERED TOURS
@@ -111,48 +111,26 @@ const handleViewTourDetail = async (id) => {
   const change = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
   const validate = () => {
-  const formErrors = {};
-  const itineraryErrors = [];
+    const formErrors = {};
+    const itineraryErrors = [];
 
-  // Validate form chính
-  if (!form.tourName?.trim()) formErrors.tourName = "Tên tour là bắt buộc";
-  if (!String(form.tourPrice || "").trim()) formErrors.tourPrice = "Giá tour là bắt buộc";
-  if (!form.description?.trim()) formErrors.description = "Mô tả tour là bắt buộc";
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // để so sánh chuẩn
+    if (!form.tourName?.trim()) formErrors.tourName = "Tên tour là bắt buộc";
+    if (!String(form.tourPrice || "").trim()) formErrors.tourPrice = "Giá tour là bắt buộc";
+    if (!form.description?.trim()) formErrors.description = "Mô tả tour là bắt buộc";
 
-  // Validate lịch trình
-  form.itinerary.forEach((item, index) => {
-    const err = {};
+    form.itinerary.forEach((item, index) => {
+      const err = {};
+      itineraryErrors[index] = err;
+    });
 
+    setErrors(formErrors);
+    setItineraryErrors(itineraryErrors);
 
-    const start = item.startDate ? new Date(item.startDate) : null;
-    const end = item.endDate ? new Date(item.endDate) : null;
-    
-    if (!start) err.startDate = "Vui lòng chọn ngày đi";
-    if (!end) err.endDate = "Vui lòng chọn ngày về";
+    const hasFormError = Object.keys(formErrors).length > 0;
+    const hasItineraryError = itineraryErrors.some(x => Object.keys(x).length > 0);
 
-    if (item.startDate && item.endDate && item.startDate > item.endDate) { // Ngày về < ngày đi
-      err.endDate = "Ngày về phải lớn hơn hoặc bằng ngày đi";
-    } else if (start && start <= today) {
-      err.startDate = "Ngày đi không được nhỏ hơn ngày hiện tại"; // Ngày đi < hôm nay
-    } else if (end && end <= today) {
-      err.endDate = "Ngày về không được nhỏ hơn ngày hiện tại";    // Ngày về < hôm nay
-    }
-
-    itineraryErrors[index] = err;
-  });
-
-  // Lưu lỗi vào state
-  setErrors(formErrors);
-  setItineraryErrors(itineraryErrors);
-
-  // Nếu có lỗi → return false
-  const hasFormError = Object.keys(formErrors).length > 0;
-  const hasItineraryError = itineraryErrors.some((x) => Object.keys(x).length > 0);
-
-  return !(hasFormError || hasItineraryError); // true = hợp lệ
-};
+    return !(hasFormError || hasItineraryError);
+  };
 
   // FORM HANDLERS
   const openAdd = () => {
@@ -170,8 +148,6 @@ const handleViewTourDetail = async (id) => {
     const formattedItinerary = (tour.schedules || []).map((it) => ({
       schedule: it.itinerary ?? "",
       note: it.notes ?? "",
-      startDate: it.startDate ? it.startDate.substring(0, 10) : "",
-      endDate: it.endDate ? it.endDate.substring(0, 10) : "",
       status: it.status ?? "1",
     }));
 
@@ -202,11 +178,11 @@ const handleViewTourDetail = async (id) => {
   };
 
   // ITINERARY HANDLERS
-  const addDay = () =>
-    change("itinerary", [
-      ...(form.itinerary || []),
-      { schedule: "", startDate: "", endDate: "", status: "1", note: "" },
-    ]);
+ const addDay = () =>
+  change("itinerary", [
+    ...(form.itinerary || []),
+    { schedule: "", note: "", status: "1" },
+  ]);
 
   const removeDay = (index) => {
     const list = [...(form.itinerary || [])];
@@ -214,12 +190,33 @@ const handleViewTourDetail = async (id) => {
     change("itinerary", list);
   };
 
-    const handleItineraryChange = (index, key, value) => {
-    const newItinerary = form.itinerary.map((item, i) =>
-      i === index ? { ...item, [key]: value } : item
-    );
-    setForm((prev) => ({ ...prev, itinerary: newItinerary }));
+  // const handleItineraryChange = (index, key, value) => {
+  //   const newItinerary = form.itinerary.map((item, i) =>
+  //     i === index ? { ...item, [key]: value } : item
+  //   );
+  //   setForm((prev) => ({ ...prev, itinerary: newItinerary }));
+  // };
+
+
+
+
+
+
+
+  // update itinerary item ( lịch trình )
+  const handleItineraryChange = (index, key, value) => {
+    const updated = form.itinerary.slice();// Tạo bản sao của danh sách lịch trình
+    const item = updated[index];// Tạo bản sao của lịch trình đó
+    item[key] = value; // Cập nhật giá trị mới
+    updated[index] = item; // Gắn lại vào danh sách
+
+    // Cập nhật lại form
+    setForm({
+      ...form,
+      itinerary: updated
+    });
   };
+
 
   const handleImgChange = (e) => {
     const file = e.target.files?.[0] ?? null;
@@ -236,7 +233,7 @@ const handleViewTourDetail = async (id) => {
       const res = await fetch(`http://localhost:3000/api/delete-tour?id=${tourId}`, { method: "DELETE" });
       const data = await res.json();
       if (data.errCode === 0) {
-        setTours((prev) => prev.filter((x) => x.id !== tourId));
+        setTours((prev) => prev.filter((x) => x.id !== tourId)); // Cập nhật lại danh sách tour  ( Lấy danh sách cũ Lọc bỏ phần tử có đúng id cần xóa Cập nhật danh sách mới vào state)
         alert("Xóa tour thành công");
       } else {
         alert(data.errMessage || "Xóa tour thất bại");
@@ -323,7 +320,7 @@ const handleViewTourDetail = async (id) => {
 
       const res = await fetch("http://localhost:3000/api/update-tour", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" }, // Gửi JSON
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -333,13 +330,29 @@ const handleViewTourDetail = async (id) => {
         return false;
       }
 
-      setTours((prev) =>
-        prev.map((t) =>
-          t.id === editTourId
-            ? { ...t, ...(data.tour || {}), image: form.img ? URL.createObjectURL(form.img) : t.image }
-            : t
-        )
-      );
+      setTours((prevTours) => {
+        const newTours = [];
+
+        for (const tour of prevTours) {
+
+          // Nếu không phải tour đang sửa → giữ nguyên
+          if (tour.id !== editTourId) {
+            newTours.push(tour);
+            continue;
+          }
+
+          // Nếu đúng tour → tạo bản cập nhật rõ ràng
+          const updatedTour = {
+            ...tour, //Lấy tất cả dữ liệu cũ của tour, copy vào object mới
+            ...data.tour, //Ghi đè các trường đã cập nhật từ API trả về
+            image: form.img ? URL.createObjectURL(form.img) : tour.image //Cập nhật ảnh nếu có
+          };
+
+          newTours.push(updatedTour); // Thêm tour đã cập nhật vào mảng mới
+        }
+
+        return newTours;
+      });
 
       alert("Cập nhật tour thành công!");
       closeForm();
@@ -500,7 +513,7 @@ const handleViewTourDetail = async (id) => {
                 <div id="form-wrapper">
                   {(form.itinerary?.length
                     ? form.itinerary
-                    : [{ schedule: "", startDate: "", endDate: "", note: "", status: "1" }]
+                    : [{ schedule: "", note: "", status: "1" }]
                   ).map((item, index) => (
                     <div
                       className="day-item"
@@ -535,46 +548,7 @@ const handleViewTourDetail = async (id) => {
                         }}
                       />
 
-                      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                        <div style={{ flex: 1 }}>
-                          <label className="dash-form-label">Ngày đi</label>
-                          <input
-                            type="date"
-                            className="dash-input dash-w100"
-                            value={item.startDate}
-                            onChange={(e) => {
-                              const list = [...(form.itinerary || [])];
-                              list[index] = { ...list[index], startDate: e.target.value };
-                              setForm((prev) => ({ ...prev, itinerary: list }));
-                            }}
-                          />
-                          {itineraryErrors[index]?.startDate && (
-                            <div className="dash-form-error">
-                              {itineraryErrors[index].startDate}
-                            </div>
-                          )}
-
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <label className="dash-form-label">Ngày về</label>
-                          <input
-                            type="date"
-                            className="dash-input dash-w100"
-                            value={item.endDate}
-                            onChange={(e) => {
-                              const list = [...(form.itinerary || [])];
-                              list[index] = { ...list[index], endDate: e.target.value };
-                              setForm((prev) => ({ ...prev, itinerary: list }));
-                            }}
-                          />
-                          {itineraryErrors[index]?.endDate && (
-                            <div className="dash-form-error">
-                              {itineraryErrors[index].endDate}
-                            </div>
-                          )}
-
-                        </div>
-                      </div>
+                      
 
                       <label className="dash-form-label">Ghi chú</label>
                       <textarea
@@ -599,7 +573,7 @@ const handleViewTourDetail = async (id) => {
                         ...prev,
                         itinerary: [
                           ...(prev.itinerary || []),
-                          { schedule: "", startDate: "", endDate: "", note: "", status: "1" },
+                          { schedule: "", note: "", status: "1" },
                         ],
                       }));
                     }}
@@ -705,7 +679,7 @@ const handleViewTourDetail = async (id) => {
                           <td style={{ textAlign: "right" }}>
                             <button className="dash-btn dash-btn-icon" onClick={() => {
                               handleViewTourDetail(t.id);      // gọi API hoặc lấy dữ liệu tour
-                             // navigate(`/qluser/${t.id}`);    // chuyển hướng
+                              // navigate(`/qluser/${t.id}`);    // chuyển hướng
                             }}>
                               <i className="fa-regular fa-pen-to-square" />
                             </button>
