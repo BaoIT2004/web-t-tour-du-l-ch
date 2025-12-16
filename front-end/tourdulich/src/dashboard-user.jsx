@@ -64,7 +64,6 @@ const Qluser = () => {
         lastName: (u.lastName || "").toLowerCase(),
         email: (u.email || "").toLowerCase(),
         address: (u.address || "").toLowerCase(),
-        phone: (u.phonenumber || "").toLowerCase(),
         role: roleText,
       };
 
@@ -194,7 +193,7 @@ const Qluser = () => {
           email: form.email,
           password: form.password,
           address: form.address,
-          phone: form.phone,       // đồng bộ với backend
+          phoneNumber: form.phone,       // đồng bộ với backend
           gender: form.gender,
           roleid: form.role,       // số: 1 = Admin, 2 = Customer
         }),
@@ -221,7 +220,7 @@ const Qluser = () => {
             lastName: form.lastName,
             email: form.email,
             address: form.address,
-            phone: form.phone,
+            phonenumber: form.phone,
             gender: form.gender,
             roleid: form.role,
             password: form.password,
@@ -277,7 +276,7 @@ const Qluser = () => {
                 lastName: form.lastName,
                 email: form.email,
                 address: form.address,
-                phone: form.phone,
+                phonenumber: form.phone,
                 gender: form.gender,
                 roleid: form.role,
               }
