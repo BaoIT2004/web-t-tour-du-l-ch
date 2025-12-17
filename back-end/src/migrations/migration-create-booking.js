@@ -11,11 +11,23 @@ module.exports = {
             },
             userId: {           // sửa từ customerid
                 type: Sequelize.INTEGER,
-                allowNull: false
+                allowNull: false,
+                references: {
+                    model: 'Users',  // tên bảng Users
+                    key: 'id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
-            tourId: {           // thêm cột tourId
+            tourId: {
                 type: Sequelize.INTEGER,
-                allowNull: false
+                allowNull: false,
+                references: {
+                    model: 'tour', // phải đúng tên bảng Tour migration
+                    key: 'id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             bookingDate: {
                 type: Sequelize.DATE

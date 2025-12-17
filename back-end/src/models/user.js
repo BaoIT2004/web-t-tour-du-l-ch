@@ -10,6 +10,14 @@
           foreignKey: 'userId', // khóa ngoại trong Booking trỏ về User
           as: 'bookings'            // alias khi truy xuất
         });
+        User.hasMany(models.Review, {
+          foreignKey: 'userId', // khóa ngoại trong Booking trỏ về User
+          as: 'reviews'            // alias khi truy xuất
+        });
+        User.hasMany(models.Payment, {
+          foreignKey: 'userId', // tạo userId trong bảng Payment
+          as: 'payments'
+        });
       }
     }
     User.init({

@@ -11,7 +11,29 @@ module.exports = {
       },
       bookingId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'Booking',   // bảng Booking
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      userId: { // thêm userId
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Users', // liên kết với bảng Users
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      totaladult: {
+        type: Sequelize.INTEGER
+      },
+      totalchild: {
+        type: Sequelize.INTEGER
       },
       totalPrice: {
         type: Sequelize.FLOAT
@@ -19,7 +41,7 @@ module.exports = {
       paymentDate: {
         type: Sequelize.DATE
       },
-      statusid: {
+      status: {
         type: Sequelize.INTEGER
       },
       paymentMethod: {

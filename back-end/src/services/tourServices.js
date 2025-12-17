@@ -48,8 +48,6 @@ let handlNewtour = (data, file) => {
             // Lấy lại tour và schedules để trả về
             const tour = await db.Tours.findOne({ where: { id: created.id } });
             const schedulesArr = await db.schedule.findAll({ where: { tourId: created.id } });
-
-
             const result = (tour && typeof tour.toJSON === 'function') ? tour.toJSON() : tour;
             result.schedules = schedulesArr;
 

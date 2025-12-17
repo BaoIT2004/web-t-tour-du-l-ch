@@ -15,11 +15,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'tourId', // trùng với khóa ngoại trong Booking
                 as: 'tour'
             });
-            
-            Booking.hasMany(models.PassengerDetail, {
-                foreignKey: 'bookingId', // khóa ngoại trong PassengerDetails
-                as: 'passengers'
-            });
+          
             // 1 booking có nhiều payment
             Booking.hasMany(models.Payment, {
                 foreignKey: 'bookingId',
@@ -46,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Booking',
+        tableName: 'booking'
     });
     return Booking;
 }; 

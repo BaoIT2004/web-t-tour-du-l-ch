@@ -20,13 +20,13 @@ module.exports = (sequelize, DataTypes) => {
         },
         itinerary: DataTypes.STRING,
         startDate: DataTypes.DATE,
-        endDate: DataTypes.DATE,
         status: DataTypes.STRING,
         notes: DataTypes.STRING,
         tourId: DataTypes.INTEGER   
     }, {
         sequelize,
         modelName: 'schedule',
+         tableName: 'schedules',
         timestamps: true
     });
     return schedule;

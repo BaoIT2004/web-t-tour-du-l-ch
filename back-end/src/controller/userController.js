@@ -1,5 +1,8 @@
 import userServices from '../services/userServices'
 import db from '../models/index.js';
+import jwt from 'jsonwebtoken';
+
+
 
 // chức năng đăng nhập
 let handleLogin = async (req, res) => {
@@ -7,17 +10,66 @@ let handleLogin = async (req, res) => {
     let password = req.body.password;
     if (!email || !password) {  //dấu "!" check rỗng , null , undefine
         return res.status(500).json({
-            message: 'Missing inputs parameter!'
+            message: 'Thiếu thông tin đầu vào!'
         })
     }
 
     let userData = await userServices.handleLogin(email, password);
+
+    if (userData.errCode === 0) {
+        const token = jwt.sign(
+            {
+                id: userData.user.id,
+                email: userData.user.email,
+                role: userData.user.role,
+                firstName: userData.user.firstName,
+                lastName: userData.user.lastName,
+                address: userData.user.address,
+                gender: userData.user.gender,
+                phonenumber: userData.user.phonenumber
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' } // token lưu trong 1 ngày
+        );
+        userData.token = token;
+        //console.log('TOKEN SERVER TẠO:', token);
+
+        userData.user = {
+        id: userData.user.id,
+        email: userData.user.email,
+        role: userData.user.role,
+        firstName: userData.user.firstName,
+        lastName: userData.user.lastName,
+        address: userData.user.address,
+        gender: userData.user.gender,
+        phonenumber: userData.user.phonenumber
+    };
+    }
+
     return res.status(200).json({
         errCode: userData.errCode,
         message: userData.errMessage,
-        user: userData.user ? userData.user : {} //Nếu userData.user tồn tại (không phải null, undefined, false, 0, ""…) → gán giá trị của userData.user vào field user.
+        user: userData.user ? userData.user : {}, //Nếu userData.user tồn tại (không phải null, undefined, false, 0, ""…) → gán giá trị của userData.user vào field user.
+        token: userData.token
     })
 }
+
+let getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;  // req.user được verifyToken gán
+        const user = await getUserProfile(userId);
+
+          if (!user) {
+            return res.status(404).json({ errCode: 1, errMessage: "không tìm thấy người dùng" });
+        }
+
+        // truy vấn database lấy thông tin user
+        res.status(200).json({ errCode: 0, data: { id: userId } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ errCode: 1, errMessage: "Internal server error" });
+    }
+};
 
 
 // Hiển thị các user trong chức năng quản lí người dùng
@@ -90,6 +142,7 @@ let handleCount = async (req, res) => {
 
 export default {
     handleLogin,
+    getProfile,
     handleGetAllUser,
     handleSignup,
     handleEdituser,

@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'bookingId',
                 as: 'booking'
             });
+            Payment.belongsTo(models.User, { // liên kết với User
+                foreignKey: 'userId',
+                as: 'user'
+            });
         }
     }
     Payment.init({
@@ -18,9 +22,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        userId: { // thêm khóa ngoại trỏ về User
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        totaladult: DataTypes.INTEGER,
+        totalchild: DataTypes.INTEGER,
         totalPrice: DataTypes.FLOAT,
         paymentDate: DataTypes.DATE,
-        statusid: DataTypes.INTEGER,
+        status: DataTypes.INTEGER,
         paymentMethod: DataTypes.STRING,
     }, {
         sequelize,

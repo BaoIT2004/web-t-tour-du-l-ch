@@ -3,7 +3,10 @@ import homeController from "../controller/homeController";
 import userController from "../controller/userController";
 import tourController from "../controller/tourController";
 import bookingController from "../controller/bookingController";
+import paymentController from "../controller/paymentController.js";
 import upload from "../config/multerConfig.js";
+import reviewController from "../controller/reviewController.js";
+import { verifyToken } from '../authMiddleware.js';
 
 const router = express.Router();  // định nghĩa routerr riêng biệt cho một phần của ứng dụng 
 
@@ -20,6 +23,7 @@ const initWebRoutes = (app) => {
      //----------------- API USER -------------------------------------------
     
     router.post('/api/login', userController.handleLogin);  //1 - KH
+    router.get('/api/profile', verifyToken, userController.getProfile);
     router.get('/api/getUser', userController.handleGetAllUser); //2 -  AM
     router.post('/api/creat-new-user', userController.handleSignup) //3 ; KH đăng kí tài khoản 
     router.put('/api/edit-user', userController.handleEdituser) //4 ; Admin sửa tài khoản 
@@ -39,10 +43,11 @@ const initWebRoutes = (app) => {
     //----------------- API booking -------------------------------------------
 
     router.post('/api/creat-new-booking',  bookingController.handlNewBookingtour);
- 
+    
 
 
-    return app.use('/', router); // nexpress biết nạp route nào 
+
+    return app.use('/', router); // nexpress biết nạp route nào `
 }
 
 

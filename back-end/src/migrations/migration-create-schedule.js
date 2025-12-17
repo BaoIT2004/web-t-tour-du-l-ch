@@ -23,9 +23,6 @@ module.exports = {
       }, startDate: {
         type: Sequelize.DATE
       },
-       endDate: {
-        type: Sequelize.DATE
-      },
        status: {
         type: Sequelize.STRING
       },

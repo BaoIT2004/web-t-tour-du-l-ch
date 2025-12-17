@@ -26,7 +26,7 @@ let handleLogin = (email, password) => {
             let isExist = await checkEmail(email);
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['email', 'roleid', 'password'],
+                    attributes: ['id','email', 'roleid', 'firstName','lastName','address','gender','phonenumber','password'],
                     where: { email: email },
                     raw: true
                 });
@@ -35,29 +35,30 @@ let handleLogin = (email, password) => {
                     let check = bcrypt.compareSync(password, user.password);
                     if (check) {
                         userData.errCode = 0;
-                        userData.errMessage = `Successfully logged in`;
+                        userData.errMessage = `đăng nhập thành công`;
 
                         delete user.password; // ẩn cột password
                         userData.user = {
                             id: user.id,
                             email: user.email,
-                            role: user.roleid, // 1=Admin, 2=User
+                            role: user.roleid,    // 1=Admin, 2=User
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            address: user.address,
+                            gender: user.gender,
+                            phonenumber: user.phonenumber
                         };
-
-
-                    } else if (user) {
-
-                    } else {
+                    }else {
                         userData.errCode = 3;
-                        userData.errMessage = `wrong password`;
+                        userData.errMessage = `sai mật khẩu`;
                     }
                 } else {
                     userData.errCode = 2;
-                    userData.errMessage = `user's not found`
+                    userData.errMessage = `không tìm thấy người dùng`
                 }
             } else {
                 userData.errCode = 1;
-                userData.errMessage = `Your's email isn't exist in your system, please ttry other email`;
+                userData.errMessage = `email không tồn tại trong hệ thống. Vui lòng thử lại.`;
             }
             resolve(userData)
 
@@ -66,6 +67,14 @@ let handleLogin = (email, password) => {
         }
     })
 }
+
+let getUserProfile = async (userId) => {
+    // Lấy thông tin user từ DB
+    const user = await db.User.findByPk(userId, {
+        attributes: ['id', 'name', 'email'] // chỉ lấy các field cần thiết
+    });
+    return user;
+};
 
 let checkEmail = (Email) => {
     return new Promise(async (resolve, reject) => {
@@ -120,7 +129,7 @@ let creatNewUser = (data) => {
             if (check === true) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Your email is already in used, Please try another email!',
+                    errMessage: 'Email đã được sử dụng, vui lòng chọn email khác',
                 })
             } else {
                 let hashPasswordfrombcryptjs = await hashUserPassword(data.password);
@@ -132,12 +141,11 @@ let creatNewUser = (data) => {
                     address: data.address,
                     phonenumber: data.phoneNumber,
                     gender: data.gender === '1' ? true : false,
-                    //roleid: data.roleid
                     roleid: 2
                 })
                 resolve({
                     errCode: 0,
-                    errMessage: 'User created successfully!'
+                    errMessage: 'Tạo người dùng thành công',
                 })
             }
         } catch (e) {
@@ -155,7 +163,7 @@ let deleteUser = (id) => {
         if (!user) {
             return resolve({
                 errCode: 2,
-                errMessage: `the user isn't exist`
+                errMessage: `nguời dùng không tồn tại`
             })
         }
 
@@ -165,7 +173,7 @@ let deleteUser = (id) => {
 
         return resolve({
             errCode: 0,
-            message: `The user is deleted`
+            message: `người dùng đã được xóa thành công`
         })
     });
 }
@@ -187,7 +195,7 @@ let updateUserData = (data) => {
             if (!data.id) {
                 return resolve({
                     errCode: 2,
-                    errMessage: 'Missing required parameters'
+                    errMessage: 'thiếu thông tin người dùng'
                 });
             }
 
@@ -205,9 +213,9 @@ let updateUserData = (data) => {
                 user.lastName    = data.lastName;
                 user.email       = data.email;
                 user.address     = data.address;
-                user.phonenumber = data.phoneNumber; 
+                user.phonenumber = data.phone; 
                 user.gender      = data.gender;
-                user.roleid      = data.type;       
+                user.roleid      = data.roleid;       
 
                 await user.save();
 
@@ -230,6 +238,7 @@ let updateUserData = (data) => {
 
 module.exports = {
     handleLogin: handleLogin,
+    getUserProfile: getUserProfile,
     handleGetAllUser: handleGetAllUser,
     creatNewUser: creatNewUser,
     deleteUser: deleteUser,

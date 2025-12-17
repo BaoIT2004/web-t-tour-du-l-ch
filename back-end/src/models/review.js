@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'tourId',
                 as: 'tour'
             });
+             Review.belongsTo(models.User, {
+                foreignKey: 'userId',
+                as: 'user'
+            });
         }
     }
 
@@ -17,8 +21,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+         userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         comment: DataTypes.TEXT,
-        reviewDate: DataTypes.DATEONLY
+        reviewDate: DataTypes.DATE
     }, {
         sequelize,
         modelName: 'Review',
