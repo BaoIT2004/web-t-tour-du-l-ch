@@ -162,6 +162,7 @@ function CustomerMenu() {
 
   useEffect(() => {
     const saved = localStorage.getItem("user");
+    console.log("Dữ liệu user trong localStorage:", saved);
     const storedToken = localStorage.getItem("token");
     if (saved && storedToken) {
       try {

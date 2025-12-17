@@ -31,7 +31,7 @@ function Header() {
 function CustomerMenu() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const ref = useRef(null);
 
   useEffect(() => {
@@ -69,16 +69,16 @@ function CustomerMenu() {
         {!user ? (
           <>
             <a className="hp-dd-item" href="/login" role="menuitem">
-              Login
+              Đăng nhập
             </a>
             <a className="hp-dd-item" href="/signup" role="menuitem">
-              Signup
+              Đăng kí
             </a>
           </>
         ) : (
           <>
             <button className="logout-btn" onClick={handleLogout}>
-              Logout
+              Đăng xuất
             </button>
           </>
         )}
@@ -92,7 +92,7 @@ function TourHero({ tour, startDate, setStartDate }) {
   const [date, setDate] = useState(startDate);
   const [adult, setAdult] = useState("");
   const [child, setChild] = useState("");
-  const { user, token } = useContext(AuthContext);
+  const {user, token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   console.log("User trong TourHero:", user);
@@ -116,8 +116,22 @@ function TourHero({ tour, startDate, setStartDate }) {
       return;
     }
 
-    navigate(`/thanhtoan?total=${totalPrice}&people=${people}`);
+    // Kiểm tra người lớn và trẻ em
+    if (adult === "" || child === "") {
+      alert("Vui lòng nhập số người lớn và trẻ em!");
+      return;
+    }
+
+    const totalPeople = Number(adult) + Number(child);
+    if (totalPeople === 0) {
+      alert("Số người phải lớn hơn 0");
+      return;
+    }
+
+    // THÊM tourId VÀO URL
+    navigate(`/thanhtoan?tourId=${tour.id}&total=${totalPrice}&people=${people}&adults=${adult}&children=${child}&date=${date}`);
   };
+
   return (
     <section className="tt-main">
       <div className="hp-container">
@@ -148,7 +162,7 @@ function TourHero({ tour, startDate, setStartDate }) {
               </div>
 
               <div className="tt-form-group">
-                <label>Người lớn ▸ Age 12+</label>
+                <label>Người lớn ▸ Tuổi 12+</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -159,12 +173,12 @@ function TourHero({ tour, startDate, setStartDate }) {
                     const val = e.target.value;
                     if (val === "" || /^[0-9]+$/.test(val)) setAdult(val);
                   }}
-                  placeholder="Nhập số người"
+                  placeholder="Nhập số người lớn "
                 />
               </div>
 
               <div className="tt-form-group">
-                <label>Trẻ em ▸ Age 12-</label>
+                <label>Trẻ em ▸ Tuổi 12-</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -175,7 +189,7 @@ function TourHero({ tour, startDate, setStartDate }) {
                     const val = e.target.value;
                     if (val === "" || /^[0-9]+$/.test(val)) setChild(val);
                   }}
-                  placeholder="Nhập số người"
+                  placeholder="Nhập số trẻ em"
                 />
               </div>
 
@@ -202,7 +216,7 @@ function TourHero({ tour, startDate, setStartDate }) {
 function TourSchedule({ tour, startDate }) {
   const schedules = tour.schedules?.length
     ? tour.schedules
-    : [{ schedule: "", startDate: "", endDate: "", note: "", status: "1" }];
+    : [{ schedule: "", startDate: "", note: "", status: "1" }];
 
   const start = startDate ? new Date(startDate) : null;
 

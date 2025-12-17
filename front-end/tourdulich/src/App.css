@@ -2909,3 +2909,73 @@ input[type="password"]:focus {
   max-height: 100%; /* hoặc unset */
   overflow: auto;   /* để scroll khi quá dài */
 }
+
+
+/* Container chính */
+.tour-container {
+  max-width: 800px;   /* Giới hạn chiều rộng */
+  margin: 20px auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Box bên trong */
+.tour-section-box {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Tiêu đề section */
+.tour-section-header {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #222;
+  text-align: center;
+}
+
+/* Mỗi ngày tour */
+.tour-day-item {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tour-day-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Nhãn */
+.tour-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* Textarea */
+.tour-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none; /* Không cho thay đổi kích thước */
+  background-color: #fafafa;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.tour-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
+}
