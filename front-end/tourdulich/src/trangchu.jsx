@@ -1,0 +1,1060 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext.jsx";
+import "./app.css";
+
+/* ============================================================
+   CONSTANTS & DATA
+============================================================ */
+
+const TABS = ["Flights", "Hotels", "Tours", "Cars"];
+
+const featuredFlights = [
+  { city: "Lahore to Dubai", airline: "Pakistan International", price: 100 },
+  { city: "Dubai to T1", airline: "Emirates", price: 150 },
+  { city: "Kuala Lumpur to Khuenua", airline: "Malaysia Airlines", price: 200 },
+  { city: "Dubai to Sanghai", airline: "Turkish Airlines", price: 620 },
+  { city: "Berlin to London", airline: "Turkish Airlines", price: 480 },
+  { city: "Istanbul to Vitas", airline: "Turkish Airlines", price: 600 },
+];
+
+const HOTELS = [
+  {
+    title: "Movenpick Grand Al Bustan",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    price: 200,
+    rating: 5,
+    img: "https://phptravels.net/uploads/184028-28-01-2023-1674874284.jpg",
+  },
+  {
+    title: "Four Points Bur Dubai",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    price: 260,
+    rating: 4,
+    img: "https://phptravels.net/uploads/182171-28-01-2023-1674874525.jpg",
+  },
+  {
+    title: "Armani Hotel Dubai",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    price: 100,
+    rating: 3,
+    img: "https://phptravels.net/uploads/508456-29-01-2023-1675019630.jpg",
+  },
+];
+
+const TRANSFER_CARS = [
+  {
+    title: "Hyundai i10 or similar",
+    price: 150,
+    rating: 5,
+    img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png",
+  },
+  {
+    title: "Ford Focus 2023",
+    price: 100,
+    rating: 5,
+    img: "https://phptravels.net/uploads/58mw99nsyz48w084g.png",
+  },
+  {
+    title: "Toyota Camry 2023 full options",
+    price: 120,
+    rating: 3,
+    img: "https://phptravels.net/uploads/uwps0eeblus4ws4ooo.jpg",
+  },
+];
+
+// =================UTILITY FUNCTIONS =========================
+
+const getTodayDate = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
+
+const getTomorrowDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
+
+
+
+/* ============================================================
+   HEADER COMPONENTS
+============================================================ */
+const handleLogin = async (e) => {
+  e.preventDefault();
+  const res = await fetch("http://localhost:3000/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+
+  if (data.user) {
+    // Lưu user và token vào localStorage
+    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token); // nếu cần token
+
+    // Chuyển hướng về trang chủ
+    window.location.href = "/home";
+  } else {
+    alert("Login failed");
+  }
+};
+
+
+function Header() {
+  return (
+    <header className="hp-topbar">
+      <div className="hp-brand">
+        <a
+          href="/home"
+          style={{
+            textDecoration: "none",
+            color: "inherit",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <span className="hp-logo"></span>
+          <span>BTQQ Travel</span>
+        </a>
+        <span className="hp-brand-sub"></span>
+      </div>
+
+      <nav className="hp-nav">
+        <a href="/flights">Flights</a>
+        <a href="/hotels">Hotels</a>
+        <a href="/tours">Tours</a>
+        <a href="/cars">Cars</a>
+        <a href="/blogs">Blogs</a>
+      </nav>
+
+      <div>
+        <CustomerMenu />
+      </div>
+    </header>
+  );
+}
+
+
+
+function CustomerMenu() {
+  const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const ref = useRef(null);
+  
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    window.location.href = "/login";
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("user");
+    console.log("Dữ liệu user trong localStorage:", saved);
+    const storedToken = localStorage.getItem("token");
+    if (saved && storedToken) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        setToken(storedToken);
+        console.log("người dùng đã tải:", parsed); // Debug
+        console.log("Token loaded:", storedToken); // Debug
+      } catch (e) {
+        console.log("Parse user failed:", e);
+        setUser(null);
+        setToken(null);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onEsc = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("click", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("click", onDoc);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, []);
+
+  return (
+    <div className={`hp-dd ${open ? "open" : ""}`} ref={ref}>
+      <button
+        className="hp-pill"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        {user && user.email ? `${user.email} ▾` : "Customer ▾"}
+      </button>
+
+      <div className="hp-dd-menu" role="menu">
+        {!user ? (
+          <>
+            <a className="hp-dd-item" href="/login" role="menuitem">
+              Login
+            </a>
+            <a className="hp-dd-item" href="/signup" role="menuitem">
+              Signup
+            </a>
+          </>
+        ) : (
+          <>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   HERO & SEARCH SECTION
+============================================================ */
+
+function HeroSearch() {
+  const [activeTab, setActiveTab] = useState("Flights");
+
+  // Flight states
+  const [tripType, setTripType] = useState("oneway");
+  const [cabin, setCabin] = useState("economy");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState(getTodayDate);
+  const [travellers, setTravellers] = useState(1);
+
+  // Hotel states
+  const [hotelLocation, setHotelLocation] = useState("");
+  const [hotelCheckin, setHotelCheckin] = useState(getTodayDate);
+  const [hotelCheckout, setHotelCheckout] = useState(getTomorrowDate);
+  const [hotelRooms, setHotelRooms] = useState(1);
+  const [hotelTravellers, setHotelTravellers] = useState(2);
+  const [openGuests, setOpenGuests] = useState(false);
+
+  // Tour states
+  const [tourLocation, setTourLocation] = useState("");
+  const [tourDate, setTourDate] = useState(getTodayDate);
+  const [tourTravellers, setTourTravellers] = useState(1);
+  const [openTourGuests, setOpenTourGuests] = useState(false);
+
+  // Car states
+  const [carLocation, setCarLocation] = useState("");
+  const [carPickup, setCarPickup] = useState(getTodayDate);
+  const [carDropoff, setCarDropoff] = useState(getTomorrowDate);
+  const [carTravellers, setCarTravellers] = useState(1);
+  const [openCarGuests, setOpenCarGuests] = useState(false);
+
+  // Refs
+  const hotelGuestsRef = useRef(null);
+  const tourGuestsRef = useRef(null);
+  const carGuestsRef = useRef(null);
+
+  const swap = () => {
+    setFrom(to);
+    setTo(from);
+  };
+
+  const changeHotelGuest = (type, delta) => {
+    if (type === "rooms") {
+      setHotelRooms((v) => Math.max(1, v + delta));
+    } else if (type === "travellers") {
+      setHotelTravellers((v) => Math.max(1, v + delta));
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (hotelGuestsRef.current && !hotelGuestsRef.current.contains(e.target)) {
+        setOpenGuests(false);
+      }
+      if (tourGuestsRef.current && !tourGuestsRef.current.contains(e.target)) {
+        setOpenTourGuests(false);
+      }
+      if (carGuestsRef.current && !carGuestsRef.current.contains(e.target)) {
+        setOpenCarGuests(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <section className="hp-hero">
+      <div className="hp-container">
+        <h1>Your Trip Starts Here!</h1>
+        <p>
+          Let us help you plan your next journey — the one that will leave a
+          lifetime of memories.
+        </p>
+
+        <div className="hp-tabs">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              className={`hp-tab ${t === activeTab ? "hp-active" : ""}`}
+              onClick={() => setActiveTab(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        <div className="hp-search">
+          {activeTab === "Flights" && (
+            <FlightSearch
+              tripType={tripType}
+              setTripType={setTripType}
+              cabin={cabin}
+              setCabin={setCabin}
+              from={from}
+              setFrom={setFrom}
+              to={to}
+              setTo={setTo}
+              date={date}
+              setDate={setDate}
+              travellers={travellers}
+              setTravellers={setTravellers}
+              swap={swap}
+            />
+          )}
+
+          {activeTab === "Hotels" && (
+            <HotelSearch
+              hotelLocation={hotelLocation}
+              setHotelLocation={setHotelLocation}
+              hotelCheckin={hotelCheckin}
+              setHotelCheckin={setHotelCheckin}
+              hotelCheckout={hotelCheckout}
+              setHotelCheckout={setHotelCheckout}
+              hotelRooms={hotelRooms}
+              hotelTravellers={hotelTravellers}
+              openGuests={openGuests}
+              setOpenGuests={setOpenGuests}
+              changeHotelGuest={changeHotelGuest}
+              hotelGuestsRef={hotelGuestsRef}
+            />
+          )}
+
+          {activeTab === "Tours" && (
+            <TourSearch
+              tourLocation={tourLocation}
+              setTourLocation={setTourLocation}
+              tourDate={tourDate}
+              setTourDate={setTourDate}
+              tourTravellers={tourTravellers}
+              setTourTravellers={setTourTravellers}
+              openTourGuests={openTourGuests}
+              setOpenTourGuests={setOpenTourGuests}
+              tourGuestsRef={tourGuestsRef}
+            />
+          )}
+
+          {activeTab === "Cars" && (
+            <CarSearch
+              carLocation={carLocation}
+              setCarLocation={setCarLocation}
+              carPickup={carPickup}
+              setCarPickup={setCarPickup}
+              carDropoff={carDropoff}
+              setCarDropoff={setCarDropoff}
+              carTravellers={carTravellers}
+              setCarTravellers={setCarTravellers}
+              openCarGuests={openCarGuests}
+              setOpenCarGuests={setOpenCarGuests}
+              carGuestsRef={carGuestsRef}
+            />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   SEARCH FORM COMPONENTS
+============================================================ */
+
+function FlightSearch({
+  tripType,
+  setTripType,
+  cabin,
+  setCabin,
+  from,
+  setFrom,
+  to,
+  setTo,
+  date,
+  setDate,
+  travellers,
+  setTravellers,
+  swap,
+}) {
+  return (
+    <>
+      <div className="hp-search-top">
+        <div className="hp-chip">
+          <span></span>
+          <select value={tripType} onChange={(e) => setTripType(e.target.value)}>
+            <option value="oneway">One Way</option>
+            <option value="round">Round Trip</option>
+          </select>
+        </div>
+        <div className="hp-chip">
+          <span></span>
+          <select value={cabin} onChange={(e) => setCabin(e.target.value)}>
+            <option value="economy">Economy</option>
+            <option value="premium">Premium Economy</option>
+            <option value="business">Business</option>
+            <option value="first">First</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="hp-grid">
+        <label className="hp-field">
+          <span></span>
+          <input
+            placeholder="Flying From"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+        </label>
+
+        <button className="hp-swap" onClick={swap} title="Swap">
+          ⇄
+        </button>
+
+        <label className="hp-field">
+          <span></span>
+          <input
+            placeholder="Destination To"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+        </label>
+
+        <label className="hp-field">
+          <span></span>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </label>
+
+        <label className="hp-field hp-inline">
+          <span>Hành khách</span>
+          <input
+            type="number"
+            min={1}
+            value={travellers}
+            onChange={(e) => setTravellers(Math.max(1, +e.target.value))}
+          />
+        </label>
+
+        <button className="hp-search-btn">🔎</button>
+      </div>
+    </>
+  );
+}
+
+function HotelSearch({
+  hotelLocation,
+  setHotelLocation,
+  hotelCheckin,
+  setHotelCheckin,
+  hotelCheckout,
+  setHotelCheckout,
+  hotelRooms,
+  hotelTravellers,
+  openGuests,
+  setOpenGuests,
+  changeHotelGuest,
+  hotelGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-hotels">
+      <label className="hp-hotel-field hp-hotel-loc">
+        <input
+          className="hp-hotel-input"
+          placeholder="Where are you going?"
+          value={hotelLocation}
+          onChange={(e) => setHotelLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Checkin</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={hotelCheckin}
+            onChange={(e) => setHotelCheckin(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Checkout</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={hotelCheckout}
+            onChange={(e) => setHotelCheckout(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={hotelGuestsRef}
+        className="hp-hotel-field hp-hotel-people"
+        onClick={() => setOpenGuests((v) => !v)}
+      >
+        <div className="hp-hotel-people-text">
+          <span className="hp-hotel-label">Travellers</span>
+          <strong>{hotelTravellers}</strong>
+          <span className="hp-hotel-label rooms-label">Rooms</span>
+          <strong>{hotelRooms}</strong>
+        </div>
+
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Rooms</span>
+              <div className="hp-guest-counter">
+                <button onClick={() => changeHotelGuest("rooms", -1)}>−</button>
+                <span>{hotelRooms}</span>
+                <button onClick={() => changeHotelGuest("rooms", 1)}>+</button>
+              </div>
+            </div>
+
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button onClick={() => changeHotelGuest("travellers", -1)}>
+                  −
+                </button>
+                <span>{hotelTravellers}</span>
+                <button onClick={() => changeHotelGuest("travellers", 1)}>
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+function TourSearch({
+  tourLocation,
+  setTourLocation,
+  tourDate,
+  setTourDate,
+  tourTravellers,
+  setTourTravellers,
+  openTourGuests,
+  setOpenTourGuests,
+  tourGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-tours">
+      <label className="hp-hotel-field hp-tour-city">
+        <input
+          className="hp-hotel-input"
+          placeholder="Search your city"
+          value={tourLocation}
+          onChange={(e) => setTourLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={tourDate}
+            onChange={(e) => setTourDate(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={tourGuestsRef}
+        className="hp-hotel-field hp-tour-people"
+        onClick={() => setOpenTourGuests((v) => !v)}
+      >
+        <span className="hp-hotel-icon">👥</span>
+        <div className="hp-tour-people-text">
+          <span className="hp-tour-label-strong">Travellers</span>
+          <span>&nbsp;{tourTravellers}</span>
+        </div>
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openTourGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button
+                  onClick={() => setTourTravellers((v) => Math.max(1, v - 1))}
+                >
+                  −
+                </button>
+                <span>{tourTravellers}</span>
+                <button onClick={() => setTourTravellers((v) => v + 1)}>
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+function CarSearch({
+  carLocation,
+  setCarLocation,
+  carPickup,
+  setCarPickup,
+  carDropoff,
+  setCarDropoff,
+  carTravellers,
+  setCarTravellers,
+  openCarGuests,
+  setOpenCarGuests,
+  carGuestsRef,
+}) {
+  return (
+    <div className="hp-grid-cars">
+      <label className="hp-hotel-field">
+        <input
+          className="hp-hotel-input"
+          placeholder="Search your city"
+          value={carLocation}
+          onChange={(e) => setCarLocation(e.target.value)}
+        />
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Pick up date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={carPickup}
+            onChange={(e) => setCarPickup(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label className="hp-hotel-field">
+        <div className="hp-hotel-text">
+          <span className="hp-hotel-label">Drop off date</span>
+          <input
+            type="date"
+            className="hp-hotel-date-input"
+            value={carDropoff}
+            onChange={(e) => setCarDropoff(e.target.value)}
+          />
+        </div>
+      </label>
+
+      <label
+        ref={carGuestsRef}
+        className="hp-hotel-field hp-tour-people"
+        onClick={() => setOpenCarGuests((v) => !v)}
+      >
+        <span className="hp-hotel-icon">👥</span>
+        <div className="hp-tour-people-text">
+          <span className="hp-tour-label-strong">Travellers</span>
+          <span>&nbsp;{carTravellers}</span>
+        </div>
+        <span className="hp-hotel-chevron">▾</span>
+
+        {openCarGuests && (
+          <div
+            className="hp-guests-popover"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hp-guest-row">
+              <span className="hp-guest-label">Travellers</span>
+              <div className="hp-guest-counter">
+                <button
+                  onClick={() => setCarTravellers((v) => Math.max(1, v - 1))}
+                >
+                  −
+                </button>
+                <span>{carTravellers}</span>
+                <button onClick={() => setCarTravellers((v) => v + 1)}>+</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button className="hp-search-btn">🔎</button>
+    </div>
+  );
+}
+
+/* ============================================================
+   FEATURED SECTIONS
+============================================================ */
+
+function FeaturedFlights() {
+  return (
+    <section className="hp-featured">
+      <div className="hp-container">
+        <h2>Chuyến bay nổi bật</h2>
+        <div className="hp-cards">
+          {featuredFlights.map((f, i) => (
+            <div className="hp-card" key={i}>
+              <div className="hp-card-head">
+                <h3>{f.city}</h3>
+                <span>✈️</span>
+              </div>
+              <div className="hp-card-sub">{f.airline}</div>
+              <div className="hp-card-price">From USD {f.price.toFixed(2)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturedHotels() {
+  return (
+    <section className="hp-hotels">
+      <div className="hp-container">
+        <div className="hp-hotels-head">
+          <h2>Khách sạn nổi bật</h2>
+        </div>
+
+        <div className="hp-hotels-grid">
+          {HOTELS.slice(0, 3).map((h, i) => (
+            <article key={i} className="hp-hotel-card">
+              <div className="hp-hotel-img">
+                {h.img ? (
+                  <img src={h.img} alt={h.title} />
+                ) : (
+                  <div className="hp-hotel-img-ph">Image</div>
+                )}
+              </div>
+              <div className="hp-hotel-meta">
+                <div className="hp-hotel-price">
+                  <span className="currency">USD</span>{" "}
+                  <strong>{h.price.toFixed(2)}</strong>{" "}
+                  <span className="per">/ Night</span>
+                  <span className="bolt"></span>
+                  <span className="rating">⭐ {h.rating}</span>
+                </div>
+                <h3 className="hp-hotel-title">{h.title}</h3>
+                <div
+                  className="hp-hotel-loc"
+                  style={{ marginTop: "30px", marginBottom: "30px" }}
+                >
+                  <span className="city">{h.city}</span>{" "}
+                  <span className="country">{h.country}</span>
+                </div>
+              </div>
+            </article>
+          ))}
+
+          <article className="hp-hotel-card hp-hotel-promo-card">
+            <div
+              className="hp-hotel-img"
+              style={{
+                backgroundImage:
+                  "url('https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            ></div>
+
+            <div className="hp-hotel-meta promo-meta">
+              <h3 className="hp-hotel-title">Xem thêm nhiều khách sạn</h3>
+              <p className="promo-text">rất nhiều khách sạn đang chờ bạn</p>
+
+              <a
+                href="/hotels"
+                className="hp-hotel-promo-btn"
+                style={{ marginTop: "20px" }}
+              >
+                View More
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PopularTours() {
+  const navigate = useNavigate();
+  const [tours, setTours] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/view-new-tour")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("DỮ LIỆU TOUR TỪ BACKEND:", data);
+        setTours(Array.isArray(data.tours) ? data.tours : []);
+      })
+      .catch((err) => console.log("Lỗi fetch tours:", err));
+  }, []);
+
+  const firstTour = tours[0];
+
+  return (
+    <section className="hp-tours">
+      <div className="hp-container">
+        <div className="hp-hotels-head">
+          <h2>Tour phổ biến</h2>
+        </div>
+
+        <div className="hp-tours-grid">
+          {tours.map((tour, i) => (
+            <article
+              key={tour.id || i}
+              className="hp-tour-card"
+              style={{
+                backgroundImage: tour.image
+                  ? `url("http://localhost:3000${tour.image}")`
+                  : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="hp-tour-overlay">
+                <div className="hp-tour-info">
+                  <h3 className="hp-tour-title">{tour.tourName}</h3>
+                  <p className="hp-tour-price">
+                    VND {Number(tour.tourPrice || 0).toFixed(2)}
+                  </p>
+                  <hr />
+                  <div className="hp-tour-bottom">
+                    <div className="hp-tour-rating">⭐⭐⭐⭐⭐</div>
+                    <button
+                      className="hp-tour-btn"
+                      onClick={() => navigate(`/dattour/${tour.id}`)}
+                    >
+                      Chi tiết →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+
+          <article
+            className="hp-tour-card"
+            style={{
+              backgroundImage: firstTour?.image
+                ? `url("http://localhost:3000${firstTour.image}")`
+                : 'url("https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg")',
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="hp-tour-overlay">
+              <div className="hp-tour-info">
+                <h3 className="hp-tour-title">Khám phá thêm tour</h3>
+                <p className="hp-tour-price">
+                  Rất nhiều hành trình thú vị đang chờ bạn.
+                </p>
+
+                <hr />
+
+                <div className="hp-tour-bottom">
+                  <div></div>
+                  <a
+                    href="/tours"
+                    className="hp-tour-btn"
+                    style={{ padding: "6px 16px", marginRight: "60px" }}
+                  >
+                    Xem thêm →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RecommendedCars() {
+  return (
+    <section className="hp-cars">
+      <div className="hp-container">
+        <h2>Xe trung chuyển được đề xuất</h2>
+
+        <div className="hp-cars-grid">
+          <article className="hp-cars-promo">
+            <div
+              className="hp-cars-promo-img"
+              style={{
+                backgroundImage:
+                  "url('https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-o-to-11.jpg')",
+              }}
+            ></div>
+
+            <div className="hp-cars-promo-body">
+              <h3>Discover great cars for transfers</h3>
+              <p>Comfortable rides from airport to your hotel and more.</p>
+              <button className="hp-cars-promo-btn">View More</button>
+            </div>
+          </article>
+
+          {TRANSFER_CARS.map((car, i) => (
+            <article key={i} className="hp-car-card">
+              <div className="hp-car-img">
+                {car.img ? (
+                  <img src={car.img} alt={car.title} />
+                ) : (
+                  <div className="hp-car-img-ph">Car image</div>
+                )}
+              </div>
+              <h3 className="hp-car-title">{car.title}</h3>
+              <div className="hp-car-rating">{"★".repeat(car.rating)}</div>
+              <div className="hp-car-meta">
+                <span className="hp-car-price">
+                  <span className="currency">USD</span>{" "}
+                  <strong>{car.price.toFixed(2)}</strong>
+                </span>
+              </div>
+
+              <button className="hp-car-btn">Book Now</button>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+function Footer() {
+  return (
+    <footer className="hp-footer">
+      <div className="hp-container hp-footer-inner">
+        <div className="hp-footer-col">
+          <h3>BTQQ Travel</h3>
+          <p>Your trusted partner for flights, hotels, tours and cars.</p>
+        </div>
+
+        <div className="hp-footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li>
+              <a href="#">Flights</a>
+            </li>
+            <li>
+              <a href="#">Hotels</a>
+            </li>
+            <li>
+              <a href="#">Tours</a>
+            </li>
+            <li>
+              <a href="#">Cars</a>
+            </li>
+          </ul>
+        </div>
+
+        <div className="hp-footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li>
+              <a href="#">Help Center</a>
+            </li>
+            <li>
+              <a href="#">Contact Us</a>
+            </li>
+            <li>
+              <a href="#">Booking Guide</a>
+            </li>
+          </ul>
+        </div>
+
+        <div className="hp-footer-col">
+          <h4>Follow Us</h4>
+          <div className="hp-footer-social">
+            <a href="#">🌐</a>
+            <a href="#">📘</a>
+            <a href="#">📸</a>
+            <a href="#">🎵</a>
+          </div>
+        </div>
+      </div>
+
+      <div className="hp-footer-bottom">
+        © {new Date().getFullYear()} BTQQ Travel — All rights reserved.
+      </div>
+    </footer>
+  );
+}
+
+/* ============================================================
+   MAIN PAGE COMPONENT
+============================================================ */
+
+export default function TrangChu() {
+  return (
+    <div className="home-page">
+      <Header />
+      <HeroSearch />
+      <FeaturedFlights />
+      <FeaturedHotels />
+      <PopularTours />
+      <RecommendedCars />
+      <Footer />
+    </div>
+  );
+}
